@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String       @id @default(uuid())
+  email       String       @unique
+  password    String
+  nickname    String
+  created_at  DateTime     @default(now())
+  current_tag String
+
+  // Relations
+  posts       FailPost[]
+  badges      UserBadge[]
+}
+
+model FailPost {
+  id         String   @id @default(uuid())
+  user_id    String
+  text       String
+  tag        String
+  image_id   String
+  created_at DateTime @default(now())
+
+  // Relations
+  user       User     @relation(fields: [user_id], references: [id])
+  badge      Badge    @relation(fields: [tag], references: [tag])
+}
+
+model Badge {
+  tag        String       @id
+  badge_name String
+
+  // Relations
+  posts      FailPost[]
+  userBadges UserBadge[]
+}
+
+model UserBadge {
+  user_id     String
+  tag         String
+  obtained_at DateTime     @default(now())
+
+  // Relations
+  user        User         @relation(fields: [user_id], references: [id])
+  badge       Badge        @relation(fields: [tag], references: [tag])
+
+  @@id([user_id, tag]) // 복합 기본키로 중복 방지
+}
+
