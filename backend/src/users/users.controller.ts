@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, HttpCode } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ObtainBadgeDto } from './dto/obtain-badge/obtain-badge';
 
@@ -7,6 +7,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get(':user_id')
+  @HttpCode(200)
   getUserinfo(@Param('user_id') userId: string) {
     // This should be implemented with AuthGuard and user decorator
     return this.usersService.getUserInfo(userId);
