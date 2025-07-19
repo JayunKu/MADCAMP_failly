@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Param, Body } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { ObtainBadgeDto } from './dto/obtain-badge/obtain-badge';
 
 @Controller('users')
 export class UsersController {
@@ -24,7 +25,7 @@ export class UsersController {
   @Post(':user_id/badges')
   obtainBadge(
     @Param('user_id') userId: string,
-    @Body() obtainBadgeDto: any, // DTO is not defined yet, so using 'any' for now.
+    @Body() obtainBadgeDto: ObtainBadgeDto,
   ) {
     return this.usersService.obtainBadge(userId, obtainBadgeDto);
   }

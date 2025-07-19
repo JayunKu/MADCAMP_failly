@@ -1,13 +1,14 @@
 import { Controller, Get, Post, Delete, Param, Body } from '@nestjs/common';
 import { FailpostsService } from './failposts.service';
+import { CreateFailpostDto } from './dto/create-failpost/create-failpost';
+import { AddReactionDto } from './dto/add-reaction/add-reaction';
 
 @Controller('failposts')
 export class FailpostsController {
   constructor(private readonly failpostsService: FailpostsService) {}
 
   @Post()
-  createFailpost(@Body() createFailpostDto: any) {
-    // DTO is not defined yet, so using 'any' for now.
+  createFailpost(@Body() createFailpostDto: CreateFailpostDto) {
     return this.failpostsService.createFailpost(createFailpostDto);
   }
 
@@ -29,7 +30,7 @@ export class FailpostsController {
   @Post(':failpost_id/reactions')
   addFailpostReaction(
     @Param('failpost_id') failpostId: string,
-    @Body() addReactionDto: any, // DTO is not defined yet, so using 'any' for now.
+    @Body() addReactionDto: AddReactionDto,
   ) {
     return this.failpostsService.addFailpostReaction(failpostId, addReactionDto);
   }

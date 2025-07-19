@@ -14,16 +14,16 @@ datasource db {
 }
 
 model User {
-  id          String       @id @default(uuid())
-  email       String       @unique
+  id          String   @id @default(uuid())
+  email       String   @unique
   password    String
   nickname    String
-  created_at  DateTime     @default(now())
-  current_tag String
+  created_at  DateTime @default(now())
+  current_tag String   @default("")
 
   // Relations
-  posts       FailPost[]
-  badges      UserBadge[]
+  posts  FailPost[]
+  badges UserBadge[]
 }
 
 model FailPost {
@@ -35,12 +35,13 @@ model FailPost {
   created_at DateTime @default(now())
 
   // Relations
-  user       User     @relation(fields: [user_id], references: [id])
-  badge      Badge    @relation(fields: [tag], references: [tag])
+  user      User                    @relation(fields: [user_id], references: [id])
+  badge     Badge                   @relation(fields: [tag], references: [tag])
+  reactions FailpostReactionCount[] @relation("FailpostReactions")
 }
 
 model Badge {
-  tag        String       @id
+  tag        String @id
   badge_name String
 
   // Relations
@@ -51,23 +52,21 @@ model Badge {
 model UserBadge {
   user_id     String
   tag         String
-  obtained_at DateTime     @default(now())
+  obtained_at DateTime @default(now())
 
   // Relations
-  user        User         @relation(fields: [user_id], references: [id])
-  badge       Badge        @relation(fields: [tag], references: [tag])
+  user  User  @relation(fields: [user_id], references: [id])
+  badge Badge @relation(fields: [tag], references: [tag])
 
   @@id([user_id, tag]) // 복합 기본키로 중복 방지
 }
 
 model FailpostReactionCount {
-  failpost_id   String   @map("failpost_id")
+  failpost_id   String @map("failpost_id")
   reaction_type String
   count         Int
 
-  failpost      FailPost @relation(fields: [failpost_id], references: [id])
+  failpost FailPost @relation("FailpostReactions", fields: [failpost_id], references: [id])
 
   @@id([failpost_id, reaction_type]) // 복합 PK
 }
-
-
