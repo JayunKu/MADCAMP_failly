@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { SignupDto } from './dto/signup/signup';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login/login';
@@ -29,8 +33,20 @@ export class AuthService {
     return { message: 'success' };
   }
 
-  login(loginDto: LoginDto) {
-    // Implementation needed
-    return 'This action logs in a user';
+  async login(loginDto: LoginDto): Promise<{ message: string; user_id: string }> {
+    const { email, password } = loginDto;
+
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user || user.password !== password) {
+      throw new UnauthorizedException('invalid email or password');
+    }
+
+    return {
+      message: 'success',
+      user_id: user.id,
+    };
   }
 }
