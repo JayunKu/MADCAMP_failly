@@ -1,4 +1,36 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body } from '@nestjs/common';
+import { FailpostsService } from './failposts.service';
 
 @Controller('failposts')
-export class FailpostsController {}
+export class FailpostsController {
+  constructor(private readonly failpostsService: FailpostsService) {}
+
+  @Post()
+  createFailpost(@Body() createFailpostDto: any) {
+    // DTO is not defined yet, so using 'any' for now.
+    return this.failpostsService.createFailpost(createFailpostDto);
+  }
+
+  @Get()
+  getFailposts() {
+    return this.failpostsService.getFailposts();
+  }
+
+  @Get(':failpost_id')
+  getFailpostDetail(@Param('failpost_id') failpostId: string) {
+    return this.failpostsService.getFailpostDetail(failpostId);
+  }
+
+  @Delete(':failpost_id')
+  deleteFailpost(@Param('failpost_id') failpostId: string) {
+    return this.failpostsService.deleteFailpost(failpostId);
+  }
+
+  @Post(':failpost_id/reactions')
+  addFailpostReaction(
+    @Param('failpost_id') failpostId: string,
+    @Body() addReactionDto: any, // DTO is not defined yet, so using 'any' for now.
+  ) {
+    return this.failpostsService.addFailpostReaction(failpostId, addReactionDto);
+  }
+}

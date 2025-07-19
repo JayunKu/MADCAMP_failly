@@ -1,13 +1,12 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateFailpostDto {
-  @IsNumber()
-  user_id: number;
-
   @IsString()
+  @IsNotEmpty()
   text: string;
 
   @IsString()
+  @IsNotEmpty()
   tag: string;
 
   @IsOptional()
