@@ -6,16 +6,16 @@ import { ObtainBadgeDto } from './dto/obtain-badge/obtain-badge';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get('me')
-  getUserMe() {
+  @Get(':user_id')
+  getUserinfo(@Param('user_id') userId: string) {
     // This should be implemented with AuthGuard and user decorator
-    return this.usersService.getUserMe();
+    return this.usersService.getUserInfo(userId);
   }
 
-  @Get(':id/badges')
-  getUserBadges(@Param('id') userId: string) {
-    return this.usersService.getUserBadges(userId);
-  }
+  // @Get(':id/badges')
+  // getUserBadges(@Param('id') userId: string) {
+  //   return this.usersService.getUserBadges(userId);
+  // }
 
   @Get(':user_id/failposts')
   getUserFailposts(@Param('user_id') userId: string) {

@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class UsersService {
-  getUserMe() {
+  getUserInfo(userId: string) {
     // Implementation needed
-    return 'This action returns the current user';
+    return `This action returns a #${userId} user`;
   }
 
   getUserBadges(userId: string) {
