@@ -60,3 +60,14 @@ model UserBadge {
   @@id([user_id, tag]) // 복합 기본키로 중복 방지
 }
 
+model FailpostReactionCount {
+  failpost_id   String   @map("failpost_id")
+  reaction_type String
+  count         Int
+
+  failpost      FailPost @relation(fields: [failpost_id], references: [id])
+
+  @@id([failpost_id, reaction_type]) // 복합 PK
+}
+
+
