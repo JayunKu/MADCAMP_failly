@@ -41,8 +41,9 @@ model FailPost {
 }
 
 model Badge {
-  tag        String @id
-  badge_name String
+  tag         String @id
+  badge_name  String
+  image_url   String @default("")
 
   // Relations
   posts      FailPost[]
