@@ -39,13 +39,48 @@ export class UsersService {
   }
 
   getUserBadges(userId: string) {
-    // Implementation needed
+
     return `This action returns all badges for user #${userId}`;
   }
 
-  getUserFailposts(userId: string) {
-    // Implementation needed
-    return `This action returns all failposts for user #${userId}`;
+  async getUserFailposts(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId }
+    });
+
+    if (!user) {
+      throw new NotFoundException('user not found');
+    }
+
+    const posts = await this.prisma.failPost.findMany({
+      where: {
+        user_id: userId,
+      },
+      include: {
+        badge: true, // badge 관계 포함
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+
+    
+    const failposts = posts.map((post) => ({
+      id: post.id,
+      text: post.text,
+      tag: post.tag,
+      image_id: post.image_id,
+      created_at: post.created_at.toISOString(),
+      badge: {
+        tag: post.badge.tag,
+        badge_name: post.badge.badge_name,
+      },
+    }));
+
+    return {
+      message: 'success',
+      failposts,
+    };
   }
 
   obtainBadge(userId: string, obtainBadgeDto: any) {
