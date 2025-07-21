@@ -141,6 +141,12 @@ export class FailpostsService {
       throw new ForbiddenException('you are not the owner of this failpost');
     }
 
+    // 연결된 reaction 레코드 먼저 삭제
+    await this.prisma.failpostReactionCount.deleteMany({
+      where: { failpost_id: id },
+    });
+
+    // 그 다음 failpost 삭제
     await this.prisma.failPost.delete({
       where: { id },
     });
