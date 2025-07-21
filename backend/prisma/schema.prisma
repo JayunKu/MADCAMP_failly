@@ -31,7 +31,7 @@ model FailPost {
   user_id    String
   text       String
   tag        String
-  image_id   String
+  image_id   String?
   created_at DateTime @default(now())
 
   // Relations
@@ -68,6 +68,15 @@ model FailpostReactionCount {
   count         Int
 
   failpost FailPost @relation("FailpostReactions", fields: [failpost_id], references: [id])
+  reaction Reaction @relation(fields: [reaction_type], references: [reaction_type])
 
   @@id([failpost_id, reaction_type]) // 복합 PK
+}
+
+model Reaction {
+  reaction_type String @id
+  image_url     String
+
+  // Relations
+  failpost_reactions FailpostReactionCount[]
 }

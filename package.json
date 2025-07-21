@@ -4,6 +4,7 @@
     "dotenv": "^17.2.0"
   },
   "devDependencies": {
-    "@types/dotenv": "^6.1.1"
+    "@types/dotenv": "^6.1.1",
+    "@types/multer": "^2.0.0"
   }
 }
