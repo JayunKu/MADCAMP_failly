@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import ChatPage from './pages/ChatPage';
 import ExplorePage from './pages/ExplorePage';
 import MainPage from './pages/MainPage';
-import MyPage from './pages/MyPage';
+import MyPage from './pages/Mypage';
 import SignInPage from './pages/SignInPage';
 import RegisterPage from './pages/RegisterPage';
 import './App.css';

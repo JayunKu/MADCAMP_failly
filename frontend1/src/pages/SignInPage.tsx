@@ -33,99 +33,358 @@ export default function SignInPage() {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center bg-cover bg-center px-4"
-      style={{
-        backgroundImage: "url(/assets/texture.png)",
-      }}
-    >
-      {/* 고양이 + 로그인 카드 전체 컨테이너 */}
-      <div className="flex flex-col items-center">
-        
-        {/* 고양이 GIF */}
-        <div className="mb-4">
-          <img 
-            src="/assets/cat.gif" 
-            alt="Cat" 
-            className="w-12 h-12 rounded-full shadow-lg"
-          />
-        </div>
+    <div style={{
+      width: '100%',
+      height: '100vh',
+      background: 'linear-gradient(135deg, #f8fafc, #f1f5f9, #e2e8f0)',
+      fontFamily: 'system-ui, -apple-system, sans-serif',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* 배경 장식 요소들 */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        overflow: 'hidden',
+        pointerEvents: 'none'
+      }}>
+        <div style={{
+          position: 'absolute',
+          top: '80px',
+          left: '40px',
+          width: '120px',
+          height: '120px',
+          background: 'linear-gradient(135deg, #e2e8f0, #cbd5e1)',
+          borderRadius: '50%',
+          opacity: 0.3,
+          animation: 'pulse 2s infinite'
+        }}></div>
+        <div style={{
+          position: 'absolute',
+          bottom: '80px',
+          right: '80px',
+          width: '90px',
+          height: '90px',
+          background: 'linear-gradient(135deg, #d1d5db, #9ca3af)',
+          borderRadius: '50%',
+          opacity: 0.4
+        }}></div>
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '80px',
+          width: '60px',
+          height: '60px',
+          background: 'linear-gradient(135deg, #f3f4f6, #e5e7eb)',
+          borderRadius: '50%',
+          opacity: 0.35
+        }}></div>
+      </div>
 
-        {/* 로그인 카드 */}
-        <div className="relative w-[320px] bg-white rounded-xl shadow-md px-6 py-8 border border-gray-300">
+      {/* 상단 좌측 홈 버튼 */}
+      <div style={{
+        position: 'absolute',
+        top: '24px',
+        left: '24px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px',
+        zIndex: 50
+      }}>
+        <Link 
+          to="/main"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '25px',
+            padding: '12px 20px',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+            border: '1px solid rgba(255,255,255,0.6)',
+            transition: 'all 0.3s ease',
+            textDecoration: 'none'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 15px 35px rgba(0,0,0,0.15)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
+          }}
+        >
+          <img src="/assets/Home.png" alt="Home" style={{ width: '24px', height: '24px' }} />
+          <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#1f2937' }}>failly</span>
+        </Link>
+      </div>
 
-          {/* ← 버튼 */}
-          <button
-            onClick={() => navigate(-1)}
-            className="absolute top-3 left-3 text-lg text-black hover:text-gray-600"
-          >
-            ←
-          </button>
-
-          {/* 로고 */}
-          <h1 className="text-3xl font-bold text-center text-black font-[cursive] mb-8 mt-2">
-            failly
-          </h1>
-
-          <form onSubmit={handleSubmit}>
-            {/* 에러 메시지 */}
-            {error && (
-              <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
-                {error}
-              </div>
-            )}
-
-            {/* 이메일 */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                placeholder="Value"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+      {/* 중앙 로그인 폼 */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100%',
+        position: 'relative',
+        zIndex: 10
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '60px',
+          maxWidth: '900px',
+          width: '100%',
+          padding: '0 40px'
+        }}>
+          
+          {/* 왼쪽: 고양이 GIF와 텍스트 */}
+          <div style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center'
+          }}>
+            <div style={{ marginBottom: '32px' }}>
+              <h1 style={{
+                fontSize: '4rem',
+                fontWeight: 'bold',
+                marginBottom: '16px',
+                background: 'linear-gradient(135deg, #1f2937, #4b5563, #6b7280)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+              }}>
+                failly
+              </h1>
+              <p style={{ fontSize: '18px', color: '#6b7280', fontWeight: '500', marginBottom: '24px' }}>
+                실패를 공유하고 함께 성장해요 ✨
+              </p>
+            </div>
+            
+            {/* 고양이 GIF */}
+            <div style={{ position: 'relative' }}>
+              <div style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'linear-gradient(135deg, #9ca3af, #6b7280)',
+                borderRadius: '50%',
+                filter: 'blur(20px)',
+                opacity: 0.2,
+                transform: 'scale(1.2)'
+              }}></div>
+              <img 
+                src="/assets/cat.gif" 
+                alt="Cat" 
+                style={{
+                  position: 'relative',
+                  width: '200px',
+                  height: '200px',
+                  borderRadius: '50%',
+                  boxShadow: '0 25px 50px rgba(0,0,0,0.15)',
+                  border: '6px solid rgba(255,255,255,0.8)',
+                  objectFit: 'cover'
+                }}
               />
             </div>
+          </div>
 
-            {/* 비밀번호 */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
-              <input
-                type="password"
-                placeholder="Value"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
-              />
+          {/* 오른쪽: 로그인 폼 */}
+          <div style={{
+            flex: 1,
+            maxWidth: '400px'
+          }}>
+            <div style={{
+              background: 'white',
+              borderRadius: '24px',
+              boxShadow: '0 25px 50px rgba(0,0,0,0.15)',
+              padding: '40px',
+              border: '1px solid rgba(255,255,255,0.8)'
+            }}>
+              <h2 style={{
+                fontSize: '2rem',
+                fontWeight: 'bold',
+                textAlign: 'center',
+                color: '#1f2937',
+                marginBottom: '32px'
+              }}>
+                Sign In
+              </h2>
+
+              <form onSubmit={handleSubmit}>
+                {/* 에러 메시지 */}
+                {error && (
+                  <div style={{
+                    marginBottom: '20px',
+                    padding: '12px 16px',
+                    background: '#fef2f2',
+                    border: '1px solid #fecaca',
+                    color: '#dc2626',
+                    borderRadius: '12px',
+                    fontSize: '14px'
+                  }}>
+                    {error}
+                  </div>
+                )}
+
+                {/* 이메일 */}
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#374151',
+                    marginBottom: '8px'
+                  }}>
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="이메일을 입력하세요"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '14px 16px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '12px',
+                      fontSize: '16px',
+                      outline: 'none',
+                      transition: 'all 0.2s ease',
+                      background: '#f9fafb'
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#6b7280';
+                      e.currentTarget.style.background = 'white';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(107, 114, 128, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#d1d5db';
+                      e.currentTarget.style.background = '#f9fafb';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  />
+                </div>
+
+                {/* 비밀번호 */}
+                <div style={{ marginBottom: '32px' }}>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#374151',
+                    marginBottom: '8px'
+                  }}>
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="비밀번호를 입력하세요"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '14px 16px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '12px',
+                      fontSize: '16px',
+                      outline: 'none',
+                      transition: 'all 0.2s ease',
+                      background: '#f9fafb'
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#6b7280';
+                      e.currentTarget.style.background = 'white';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(107, 114, 128, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#d1d5db';
+                      e.currentTarget.style.background = '#f9fafb';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  />
+                </div>
+
+                {/* 로그인 버튼 */}
+                <button 
+                  type="submit"
+                  disabled={isLoading}
+                  style={{
+                    width: '100%',
+                    padding: '16px',
+                    background: isLoading ? '#9ca3af' : '#1f2937',
+                    color: 'white',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    borderRadius: '16px',
+                    border: 'none',
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.3s ease',
+                    marginBottom: '20px',
+                    boxShadow: '0 4px 15px rgba(31, 41, 55, 0.3)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isLoading) {
+                      e.currentTarget.style.background = '#111827';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(31, 41, 55, 0.4)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isLoading) {
+                      e.currentTarget.style.background = '#1f2937';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 4px 15px rgba(31, 41, 55, 0.3)';
+                    }
+                  }}
+                >
+                  {isLoading ? "로그인 중..." : "Sign In"}
+                </button>
+
+                {/* 회원가입 링크 */}
+                <div style={{ textAlign: 'center' }}>
+                  <span style={{ fontSize: '14px', color: '#6b7280' }}>계정이 없으신가요? </span>
+                  <Link
+                    to="/register"
+                    style={{
+                      fontSize: '14px',
+                      color: '#1f2937',
+                      textDecoration: 'none',
+                      fontWeight: '600',
+                      transition: 'color 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = '#374151';
+                      e.currentTarget.style.textDecoration = 'underline';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = '#1f2937';
+                      e.currentTarget.style.textDecoration = 'none';
+                    }}
+                  >
+                    Register
+                  </Link>
+                </div>
+              </form>
             </div>
-
-            {/* 로그인 버튼 */}
-            <button 
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-2 bg-black text-white text-sm rounded-md hover:bg-gray-800 transition-colors mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? "로그인 중..." : "Sign In"}
-            </button>
-          </form>
-
-          {/* 비밀번호 찾기 */}
-          <div className="text-right">
-            <Link
-              to="#"
-              className="text-xs text-blue-600 hover:underline"
-            >
-              Forgot password?
-            </Link>
           </div>
         </div>
-      
+      </div>
+
+      {/* 하단 장식 */}
+      <div style={{
+        position: 'absolute',
+        bottom: '24px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        textAlign: 'center',
+        zIndex: 10
+      }}>
+        <p style={{ fontSize: '14px', color: '#9ca3af', fontWeight: '500' }}>함께 실패하고, 함께 성장하는 공간</p>
       </div>
     </div>
   );

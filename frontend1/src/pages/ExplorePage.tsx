@@ -101,18 +101,18 @@ export default function ExplorePage() {
 
   // 실패 카테고리 목록
   const failCategories = [
-    { id: 'late', name: '지각', icon: '⏰', color: 'from-red-400 to-red-500' },
-    { id: 'exam', name: '시험 망함', icon: '📝', color: 'from-orange-400 to-orange-500' },
-    { id: 'procrastination', name: '할 일 미룸', icon: '📅', color: 'from-yellow-400 to-yellow-500' },
-    { id: 'dating', name: '소개팅 망함', icon: '💔', color: 'from-pink-400 to-pink-500' },
-    { id: 'diet', name: '다이어트 실패', icon: '🍰', color: 'from-purple-400 to-purple-500' },
-    { id: 'oversleep', name: '늦잠', icon: '😴', color: 'from-blue-400 to-blue-500' },
-    { id: 'reality', name: '현타', icon: '😵', color: 'from-indigo-400 to-indigo-500' },
-    { id: 'overthinking', name: '오버씽킹', icon: '🤯', color: 'from-teal-400 to-teal-500' },
-    { id: 'cringe', name: '이불킥', icon: '🛏️', color: 'from-green-400 to-green-500' },
-    { id: 'lazy', name: '게으름', icon: '🦥', color: 'from-gray-400 to-gray-500' },
-    { id: 'burnout', name: '번아웃', icon: '🔥', color: 'from-red-400 to-pink-500' },
-    { id: 'smoking', name: '금연 실패', icon: '🚭', color: 'from-slate-400 to-slate-500' },
+    { id: 'late', name: '지각', icon: '⏰' },
+    { id: 'exam', name: '시험 망함', icon: '📝' },
+    { id: 'procrastination', name: '할 일 미룸', icon: '📅' },
+    { id: 'dating', name: '소개팅 망함', icon: '💔' },
+    { id: 'diet', name: '다이어트 실패', icon: '🍰' },
+    { id: 'oversleep', name: '늦잠', icon: '😴' },
+    { id: 'reality', name: '현타', icon: '😵' },
+    { id: 'overthinking', name: '오버씽킹', icon: '🤯' },
+    { id: 'cringe', name: '이불킥', icon: '🛏️' },
+    { id: 'lazy', name: '게으름', icon: '🦥' },
+    { id: 'burnout', name: '번아웃', icon: '🔥' },
+    { id: 'smoking', name: '금연 실패', icon: '🚭' },
   ];
 
   const toggleLike = (postId: number) => {
@@ -197,25 +197,92 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #f8fafc, #f1f5f9, #e2e8f0)',
+      fontFamily: 'system-ui, -apple-system, sans-serif'
+    }}>
       
       {/* 상단 헤더 */}
-      <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      <div style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        background: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid #e5e7eb',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+      }}>
+        <div style={{
+          maxWidth: '1024px',
+          margin: '0 auto',
+          padding: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <button 
               onClick={() => navigate(-1)}
-              className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '40px',
+                height: '40px',
+                background: '#f3f4f6',
+                borderRadius: '50%',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '18px',
+                color: '#6b7280',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#e5e7eb';
+                e.currentTarget.style.color = '#1f2937';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#f3f4f6';
+                e.currentTarget.style.color = '#6b7280';
+              }}
             >
               ←
             </button>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <h1 style={{
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              background: 'linear-gradient(135deg, #1f2937, #4b5563, #6b7280)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}>
               failly
             </h1>
           </div>
           <button
             onClick={() => setShowWriteModal(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            style={{
+              padding: '8px 16px',
+              background: '#1f2937',
+              color: 'white',
+              borderRadius: '12px',
+              fontWeight: '600',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 15px rgba(31, 41, 55, 0.3)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#111827';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(31, 41, 55, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = '#1f2937';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 15px rgba(31, 41, 55, 0.3)';
+            }}
           >
             + 게시물 작성
           </button>
@@ -223,21 +290,59 @@ export default function ExplorePage() {
       </div>
 
       {/* 카테고리 탭 */}
-      <div className="sticky top-[73px] z-40 bg-white/95 backdrop-blur-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 py-3">
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+      <div style={{
+        position: 'sticky',
+        top: '73px',
+        zIndex: 40,
+        background: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid #e5e7eb'
+      }}>
+        <div style={{
+          maxWidth: '1024px',
+          margin: '0 auto',
+          padding: '12px 16px'
+        }}>
+          <div style={{
+            display: 'flex',
+            gap: '8px',
+            overflowX: 'auto',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none'
+          }}>
             {failCategories.map(category => (
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.name)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all ${
-                  selectedCategory === category.name 
-                    ? 'bg-blue-600 text-white shadow-md' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.2s ease',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  background: selectedCategory === category.name ? '#1f2937' : '#f3f4f6',
+                  color: selectedCategory === category.name ? 'white' : '#374151',
+                  boxShadow: selectedCategory === category.name ? '0 4px 15px rgba(31, 41, 55, 0.3)' : 'none'
+                }}
+                onMouseEnter={(e) => {
+                  if (selectedCategory !== category.name) {
+                    e.currentTarget.style.background = '#e5e7eb';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (selectedCategory !== category.name) {
+                    e.currentTarget.style.background = '#f3f4f6';
+                  }
+                }}
               >
                 <span>{category.icon}</span>
-                <span className="text-sm font-medium">{category.name}</span>
+                <span>{category.name}</span>
               </button>
             ))}
           </div>
@@ -245,114 +350,346 @@ export default function ExplorePage() {
       </div>
 
       {/* 메인 피드 */}
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        <div className="space-y-8">
+      <div style={{
+        maxWidth: '600px',
+        margin: '0 auto',
+        padding: '24px 16px'
+      }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           {getCurrentPosts().length > 0 ? (
             getCurrentPosts().map(post => (
-              <div key={post.id} className="bg-white rounded-2xl shadow-lg border-2 border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
+              <div key={post.id} style={{
+                background: 'white',
+                borderRadius: '20px',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                border: '1px solid #e5e7eb',
+                overflow: 'hidden',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.15)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+              >
               
-              {/* 게시물 헤더 */}
-              <div className="p-4 flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                  {post.author[0]}
+                {/* 게시물 헤더 */}
+                <div style={{
+                  padding: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px'
+                }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    background: 'linear-gradient(135deg, #1f2937, #4b5563)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontWeight: 'bold'
+                  }}>
+                    {post.author[0]}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{
+                      fontWeight: '600',
+                      color: '#1f2937',
+                      margin: 0,
+                      fontSize: '16px'
+                    }}>{post.author}</h3>
+                    <p style={{
+                      fontSize: '14px',
+                      color: '#6b7280',
+                      margin: 0
+                    }}>{post.time}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">{post.author}</h3>
-                  <p className="text-sm text-gray-500">{post.time}</p>
+
+                {/* 게시물 내용 */}
+                <div style={{ padding: '0 16px 12px' }}>
+                  <p style={{
+                    color: '#374151',
+                    lineHeight: '1.6',
+                    margin: 0,
+                    fontSize: '15px'
+                  }}>{post.content}</p>
                 </div>
-              </div>
 
-              {/* 게시물 내용 */}
-              <div className="px-4 pb-3">
-                <p className="text-gray-800 leading-relaxed">{post.content}</p>
-              </div>
-
-              {/* 액션 버튼 */}
-              <div className="px-4 py-3 border-t border-gray-100">
-                <div className="flex items-center gap-6">
-                  <button 
-                    onClick={() => toggleLike(post.id)}
-                    className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors"
-                  >
-                    <span className="text-xl">❤️</span>
-                    <span className="font-medium">{post.likes}</span>
-                  </button>
-                  <button 
-                    onClick={() => toggleComments(post.id)}
-                    className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors"
-                  >
-                    <span className="text-xl">💬</span>
-                    <span className="font-medium">{post.comments.length}</span>
-                  </button>
-                  <button className="flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors">
-                    <span className="text-xl">📤</span>
-                    <span className="font-medium">공유</span>
-                  </button>
+                {/* 액션 버튼 */}
+                <div style={{
+                  padding: '12px 16px',
+                  borderTop: '1px solid #f3f4f6'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '24px'
+                  }}>
+                    <button 
+                      onClick={() => toggleLike(post.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        color: '#6b7280',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        transition: 'color 0.2s ease',
+                        fontSize: '14px',
+                        fontWeight: '600'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = '#dc2626';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = '#6b7280';
+                      }}
+                    >
+                      <span style={{ fontSize: '18px' }}>❤️</span>
+                      <span>{post.likes}</span>
+                    </button>
+                    <button 
+                      onClick={() => toggleComments(post.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        color: '#6b7280',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        transition: 'color 0.2s ease',
+                        fontSize: '14px',
+                        fontWeight: '600'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = '#2563eb';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = '#6b7280';
+                      }}
+                    >
+                      <span style={{ fontSize: '18px' }}>💬</span>
+                      <span>{post.comments.length}</span>
+                    </button>
+                    <button style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      color: '#6b7280',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'color 0.2s ease',
+                      fontSize: '14px',
+                      fontWeight: '600'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = '#059669';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = '#6b7280';
+                    }}
+                    >
+                      <span style={{ fontSize: '18px' }}>📤</span>
+                      <span>공유</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              {/* 댓글 섹션 */}
-              {post.showComments && (
-                <div className="border-t border-gray-100 bg-gray-50">
-                  
-                  {/* 기존 댓글 */}
-                  {post.comments.length > 0 && (
-                    <div className="p-4 space-y-3">
-                      {post.comments.map(comment => (
-                        <div key={comment.id} className="flex gap-3">
-                          <div className="w-8 h-8 bg-gradient-to-br from-gray-400 to-gray-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                            {comment.author[0]}
-                          </div>
-                          <div className="flex-1">
-                            <div className="bg-white rounded-lg px-3 py-2">
-                              <h4 className="font-semibold text-sm text-gray-900">{comment.author}</h4>
-                              <p className="text-sm text-gray-700">{comment.content}</p>
+                {/* 댓글 섹션 */}
+                {post.showComments && (
+                  <div style={{
+                    borderTop: '1px solid #f3f4f6',
+                    background: '#f9fafb'
+                  }}>
+                    
+                    {/* 기존 댓글 */}
+                    {post.comments.length > 0 && (
+                      <div style={{
+                        padding: '16px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '12px'
+                      }}>
+                        {post.comments.map(comment => (
+                          <div key={comment.id} style={{
+                            display: 'flex',
+                            gap: '12px'
+                          }}>
+                            <div style={{
+                              width: '32px',
+                              height: '32px',
+                              background: 'linear-gradient(135deg, #6b7280, #4b5563)',
+                              borderRadius: '50%',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: 'white',
+                              fontWeight: 'bold',
+                              fontSize: '14px'
+                            }}>
+                              {comment.author[0]}
                             </div>
-                            <p className="text-xs text-gray-500 mt-1 ml-3">{comment.time}</p>
+                            <div style={{ flex: 1 }}>
+                              <div style={{
+                                background: 'white',
+                                borderRadius: '12px',
+                                padding: '12px'
+                              }}>
+                                <h4 style={{
+                                  fontWeight: '600',
+                                  fontSize: '14px',
+                                  color: '#1f2937',
+                                  margin: '0 0 4px 0'
+                                }}>{comment.author}</h4>
+                                <p style={{
+                                  fontSize: '14px',
+                                  color: '#374151',
+                                  margin: 0
+                                }}>{comment.content}</p>
+                              </div>
+                              <p style={{
+                                fontSize: '12px',
+                                color: '#6b7280',
+                                margin: '4px 0 0 12px'
+                              }}>{comment.time}</p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* 댓글 입력 */}
-                  <div className="p-4 border-t border-gray-200">
-                    <div className="flex gap-3">
-                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                        나
+                        ))}
                       </div>
-                      <div className="flex-1 flex gap-2">
-                        <input
-                          type="text"
-                          placeholder="댓글을 입력하세요..."
-                          value={commentInputs[post.id] || ''}
-                          onChange={(e) => setCommentInputs({ ...commentInputs, [post.id]: e.target.value })}
-                          onKeyPress={(e) => e.key === 'Enter' && addComment(post.id)}
-                          className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        <button
-                          onClick={() => addComment(post.id)}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-                        >
-                          게시
-                        </button>
+                    )}
+
+                    {/* 댓글 입력 */}
+                    <div style={{
+                      padding: '16px',
+                      borderTop: '1px solid #e5e7eb'
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        gap: '12px'
+                      }}>
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          background: 'linear-gradient(135deg, #1f2937, #4b5563)',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'white',
+                          fontWeight: 'bold',
+                          fontSize: '14px'
+                        }}>
+                          나
+                        </div>
+                        <div style={{
+                          flex: 1,
+                          display: 'flex',
+                          gap: '8px'
+                        }}>
+                          <input
+                            type="text"
+                            placeholder="댓글을 입력하세요..."
+                            value={commentInputs[post.id] || ''}
+                            onChange={(e) => setCommentInputs({ ...commentInputs, [post.id]: e.target.value })}
+                            onKeyPress={(e) => e.key === 'Enter' && addComment(post.id)}
+                            style={{
+                              flex: 1,
+                              padding: '8px 12px',
+                              background: 'white',
+                              border: '1px solid #d1d5db',
+                              borderRadius: '12px',
+                              fontSize: '14px',
+                              outline: 'none',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onFocus={(e) => {
+                              e.currentTarget.style.borderColor = '#6b7280';
+                              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(107, 114, 128, 0.1)';
+                            }}
+                            onBlur={(e) => {
+                              e.currentTarget.style.borderColor = '#d1d5db';
+                              e.currentTarget.style.boxShadow = 'none';
+                            }}
+                          />
+                          <button
+                            onClick={() => addComment(post.id)}
+                            style={{
+                              padding: '8px 16px',
+                              background: '#1f2937',
+                              color: 'white',
+                              borderRadius: '12px',
+                              fontSize: '14px',
+                              fontWeight: '600',
+                              border: 'none',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = '#111827';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = '#1f2937';
+                            }}
+                          >
+                            게시
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
               </div>
             ))
           ) : (
-            <div className="text-center py-16">
-              <div className="text-6xl mb-4">📝</div>
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">
+            <div style={{
+              textAlign: 'center',
+              padding: '64px 0'
+            }}>
+              <div style={{ fontSize: '4rem', marginBottom: '16px' }}>📝</div>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                color: '#6b7280',
+                marginBottom: '8px'
+              }}>
                 {selectedCategory} 카테고리에 게시물이 없어요
               </h3>
-              <p className="text-gray-500 mb-6">첫 번째 게시물을 작성해보세요!</p>
+              <p style={{
+                color: '#9ca3af',
+                marginBottom: '24px'
+              }}>첫 번째 게시물을 작성해보세요!</p>
               <button
                 onClick={() => setShowWriteModal(true)}
-                className="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+                style={{
+                  padding: '12px 24px',
+                  background: '#1f2937',
+                  color: 'white',
+                  borderRadius: '16px',
+                  fontWeight: '600',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 15px rgba(31, 41, 55, 0.3)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#111827';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 8px 25px rgba(31, 41, 55, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#1f2937';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(31, 41, 55, 0.3)';
+                }}
               >
                 + 게시물 작성하기
               </button>
@@ -363,42 +700,141 @@ export default function ExplorePage() {
 
       {/* 게시물 작성 모달 */}
       {showWriteModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-gray-900">
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 100,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '16px'
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '20px',
+            boxShadow: '0 25px 50px rgba(0,0,0,0.25)',
+            width: '100%',
+            maxWidth: '400px'
+          }}>
+            <div style={{ padding: '24px' }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '24px'
+              }}>
+                <h3 style={{
+                  fontSize: '1.25rem',
+                  fontWeight: 'bold',
+                  color: '#1f2937',
+                  margin: 0
+                }}>
                   새 게시물 작성
                 </h3>
                 <button 
                   onClick={() => setShowWriteModal(false)}
-                  className="text-2xl text-gray-500 hover:text-gray-700"
+                  style={{
+                    fontSize: '1.5rem',
+                    color: '#6b7280',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = '#374151';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = '#6b7280';
+                  }}
                 >
                   ×
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">내용</label>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#374151',
+                    marginBottom: '8px'
+                  }}>내용</label>
                   <textarea
                     placeholder={`${selectedCategory}에 대한 이야기를 들려주세요...`}
                     value={newPost}
                     onChange={(e) => setNewPost(e.target.value)}
-                    className="w-full h-32 p-4 border-2 border-gray-200 rounded-xl resize-none text-sm placeholder-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
+                    style={{
+                      width: '100%',
+                      height: '128px',
+                      padding: '16px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '16px',
+                      resize: 'none',
+                      fontSize: '14px',
+                      outline: 'none',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = '#6b7280';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(107, 114, 128, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = '#d1d5db';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
                   />
                 </div>
 
-                <div className="flex gap-3 pt-4">
+                <div style={{
+                  display: 'flex',
+                  gap: '12px',
+                  paddingTop: '16px'
+                }}>
                   <button
                     onClick={() => setShowWriteModal(false)}
-                    className="flex-1 py-3 bg-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-300 transition-colors"
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: '#f3f4f6',
+                      color: '#374151',
+                      borderRadius: '16px',
+                      fontWeight: '600',
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'background 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#e5e7eb';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#f3f4f6';
+                    }}
                   >
                     취소
                   </button>
                   <button
                     onClick={addPost}
-                    className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: '#1f2937',
+                      color: 'white',
+                      borderRadius: '16px',
+                      fontWeight: '600',
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#111827';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#1f2937';
+                    }}
                   >
                     게시하기
                   </button>
