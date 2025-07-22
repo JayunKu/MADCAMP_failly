@@ -1,9 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { loginUser } from "../api/auth";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function SignInPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -18,9 +20,13 @@ export default function SignInPage() {
       const response = await loginUser({ email, password });
       console.log("로그인 성공:", response);
       
-      // 로그인 성공 시 user_id를 localStorage에 저장
-      if (response.user_id) {
-        localStorage.setItem("user_id", response.user_id);
+      // AuthContext에 사용자 정보 저장
+      if (response.user_id && response.nickname) {
+        login({
+          id: response.user_id,
+          nickname: response.nickname,
+          email: email
+        });
       }
       
       // 메인 페이지로 이동

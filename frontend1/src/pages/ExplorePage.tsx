@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getFailposts, createFailpost, addFailpostReaction } from "../api/failposts";
+import { useAuth } from "../contexts/AuthContext";
 
 interface Comment {
   id: number;
@@ -24,6 +25,7 @@ interface Post {
 
 export default function ExplorePage() {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState('지각');
   const [showWriteModal, setShowWriteModal] = useState(false);
   const [newPost, setNewPost] = useState('');
@@ -141,13 +143,20 @@ export default function ExplorePage() {
   // 게시물 추가
   const addPost = async () => {
     if (!newPost.trim()) return;
+    
+    // 로그인 확인
+    if (!isAuthenticated || !user?.id) {
+      setError('로그인이 필요합니다.');
+      navigate('/signin');
+      return;
+    }
 
     try {
       setLoading(true);
       
-      // 실제 API 호출
+      // 실제 API 호출 - 로그인된 사용자의 실제 user_id 사용
       const result = await createFailpost({
-        user_id: 'temp-user-id', // 실제로는 로그인된 사용자 ID를 사용
+        user_id: user.id,
         text: newPost,
         tag: selectedCategory,
         image: selectedImage || undefined

@@ -1,9 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { createUser } from "../api/auth";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nickname, setNickname] = useState("");
@@ -19,8 +21,18 @@ export default function RegisterPage() {
       const response = await createUser({ email, password, nickname });
       console.log("회원가입 성공:", response);
       
-      // 회원가입 성공 시 로그인 페이지로 이동
-      navigate("/signin");
+      // 회원가입 성공 시 AuthContext에 사용자 정보 저장하고 메인 페이지로 이동
+      if (response.user_id && response.nickname) {
+        login({
+          id: response.user_id,
+          nickname: response.nickname,
+          email: email
+        });
+        navigate("/main");
+      } else {
+        // user_id나 nickname이 없으면 로그인 페이지로 이동
+        navigate("/signin");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "회원가입에 실패했습니다.");
     } finally {
