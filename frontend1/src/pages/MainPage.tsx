@@ -1,7 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function MainPage() {
+  const { user, isAuthenticated, logout } = useAuth();
   return (
     <div style={{
       width: '100%',
@@ -77,67 +79,129 @@ export default function MainPage() {
           <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#1f2937' }}>failly</span>
         </div>
         
-        <Link 
-          to="/signin" 
-          style={{
-            display: 'inline-block',
-            padding: '12px 28px',
-            background: '#1f2937',
-            color: 'white',
-            textDecoration: 'none',
-            borderRadius: '20px',
-            fontWeight: '600',
-            fontSize: '14px',
-            boxShadow: '0 4px 15px rgba(31, 41, 55, 0.3)',
-            border: '1px solid #374151',
-            transition: 'all 0.3s ease',
-            position: 'relative',
-            overflow: 'hidden'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#111827';
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 8px 25px rgba(31, 41, 55, 0.4)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = '#1f2937';
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 4px 15px rgba(31, 41, 55, 0.3)';
-          }}
-        >
-          Sign in
-        </Link>
-        
-        <Link 
-          to="/register" 
-          style={{
-            display: 'inline-block',
-            padding: '12px 28px',
-            background: 'white',
-            color: '#1f2937',
-            textDecoration: 'none',
-            borderRadius: '20px',
-            fontWeight: '600',
-            fontSize: '14px',
-            boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
-            border: '1px solid #e5e7eb',
-            transition: 'all 0.3s ease',
-            position: 'relative',
-            overflow: 'hidden'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#f9fafb';
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'white';
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)';
-          }}
-        >
-          Register
-        </Link>
+        {isAuthenticated ? (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '20px',
+              padding: '8px 16px',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+              border: '1px solid rgba(255,255,255,0.6)'
+            }}>
+              <div style={{
+                width: '32px',
+                height: '32px',
+                background: 'linear-gradient(135deg, #1f2937, #4b5563)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: '14px'
+              }}>
+                {user?.nickname?.[0] || 'U'}
+              </div>
+              <span style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937' }}>
+                {user?.nickname || '사용자'}님
+              </span>
+            </div>
+            <button
+              onClick={logout}
+              style={{
+                padding: '8px 16px',
+                background: '#dc2626',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#b91c1c';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#dc2626';
+              }}
+            >
+              로그아웃
+            </button>
+          </div>
+        ) : (
+          <>
+            <Link 
+              to="/signin" 
+              style={{
+                display: 'inline-block',
+                padding: '12px 28px',
+                background: '#1f2937',
+                color: 'white',
+                textDecoration: 'none',
+                borderRadius: '20px',
+                fontWeight: '600',
+                fontSize: '14px',
+                boxShadow: '0 4px 15px rgba(31, 41, 55, 0.3)',
+                border: '1px solid #374151',
+                transition: 'all 0.3s ease',
+                position: 'relative',
+                overflow: 'hidden'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#111827';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 8px 25px rgba(31, 41, 55, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#1f2937';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 15px rgba(31, 41, 55, 0.3)';
+              }}
+            >
+              Sign in
+            </Link>
+            
+            <Link 
+              to="/register" 
+              style={{
+                display: 'inline-block',
+                padding: '12px 28px',
+                background: 'white',
+                color: '#1f2937',
+                textDecoration: 'none',
+                borderRadius: '20px',
+                fontWeight: '600',
+                fontSize: '14px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                border: '1px solid #e5e7eb',
+                transition: 'all 0.3s ease',
+                position: 'relative',
+                overflow: 'hidden'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#f9fafb';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'white';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)';
+              }}
+            >
+              Register
+            </Link>
+          </>
+        )}
       </div>
 
       {/* 중앙: failly 로고 + 그림 */}
