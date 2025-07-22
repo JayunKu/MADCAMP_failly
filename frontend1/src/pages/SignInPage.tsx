@@ -20,13 +20,20 @@ export default function SignInPage() {
       const response = await loginUser({ email, password });
       console.log("로그인 성공:", response);
       
-      // AuthContext에 사용자 정보 저장
-      if (response.user_id && response.nickname) {
-        login({
-          id: response.user_id,
-          nickname: response.nickname,
+      // 백엔드에서 "success" 응답이 오면 로그인 상태 저장
+      if (response.message === "success" || response === "success") {
+        // 로그인 성공 상태를 localStorage에 저장
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userEmail', email);
+        
+        // AuthContext에 사용자 정보 저장
+        const userData = {
+          id: response.user_id || email, // user_id가 없으면 email을 id로 사용
+          nickname: response.nickname || email.split('@')[0], // nickname이 없으면 이메일 앞부분 사용
           email: email
-        });
+        };
+        
+        login(userData);
       }
       
       // 메인 페이지로 이동
