@@ -3,13 +3,6 @@ import { useState, useEffect } from "react";
 import { getFailposts, createFailpost, addFailpostReaction } from "../api/failposts";
 import { useAuth } from "../contexts/AuthContext";
 
-interface Comment {
-  id: number;
-  author: string;
-  content: string;
-  time: string;
-}
-
 interface Post {
   id: string;
   user_id: string;
@@ -18,9 +11,12 @@ interface Post {
   tag: string;
   image_url: string;
   created_at: string;
-  likes: number;
-  comments: Comment[];
-  showComments: boolean;
+  reactions: {
+    drink: number;
+    metoo: number;
+    thatsok: number;
+  };
+  userReaction?: 'drink' | 'metoo' | 'thatsok' | null;
 }
 
 export default function ExplorePage() {
@@ -33,7 +29,6 @@ export default function ExplorePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [commentInputs, setCommentInputs] = useState<{[key: string]: string}>({});
 
   // 실패 카테고리 목록
   const failCategories = [
@@ -73,9 +68,12 @@ export default function ExplorePage() {
       // API 응답을 UI에 맞게 변환
       const transformedPosts: Post[] = fetchedPosts.map(post => ({
         ...post,
-        likes: 0, // 백엔드에서 likes 정보가 없으므로 기본값 설정
-        comments: [], // 댓글은 별도 API로 구현 필요
-        showComments: false
+        reactions: {
+          drink: 0,
+          metoo: 0,
+          thatsok: 0
+        },
+        userReaction: null
       }));
       
       setPosts(transformedPosts);
@@ -92,52 +90,37 @@ export default function ExplorePage() {
     loadPosts(selectedCategory);
   }, [selectedCategory]);
 
-  // 좋아요 토글
-  const toggleLike = async (postId: string) => {
+  // 반응 토글
+  const toggleReaction = async (postId: string, reactionType: 'drink' | 'metoo' | 'thatsok') => {
     try {
-      // 실제로는 addFailpostReaction API를 사용해야 하지만, 
-      // 현재는 UI만 업데이트
-      setPosts(prev => prev.map(post => 
-        post.id === postId 
-          ? { ...post, likes: post.likes + 1 }
-          : post
-      ));
+      setPosts(prev => prev.map(post => {
+        if (post.id === postId) {
+          const newReactions = { ...post.reactions };
+          const currentUserReaction = post.userReaction;
+          
+          // 이미 같은 반응을 눌렀다면 제거
+          if (currentUserReaction === reactionType) {
+            newReactions[reactionType] = Math.max(0, newReactions[reactionType] - 1);
+            return { ...post, reactions: newReactions, userReaction: null };
+          }
+          
+          // 다른 반응이 있었다면 제거
+          if (currentUserReaction) {
+            newReactions[currentUserReaction] = Math.max(0, newReactions[currentUserReaction] - 1);
+          }
+          
+          // 새 반응 추가
+          newReactions[reactionType] = newReactions[reactionType] + 1;
+          return { ...post, reactions: newReactions, userReaction: reactionType };
+        }
+        return post;
+      }));
       
       // 실제 API 호출 (반응 추가)
-      // await addFailpostReaction(postId, 'like');
+      // await addFailpostReaction(postId, reactionType);
     } catch (err) {
-      console.error('Failed to toggle like:', err);
+      console.error('Failed to toggle reaction:', err);
     }
-  };
-
-  // 댓글 토글
-  const toggleComments = (postId: string) => {
-    setPosts(prev => prev.map(post => 
-      post.id === postId 
-        ? { ...post, showComments: !post.showComments }
-        : post
-    ));
-  };
-
-  // 댓글 추가
-  const addComment = (postId: string) => {
-    const commentText = commentInputs[postId];
-    if (!commentText?.trim()) return;
-
-    const newComment: Comment = {
-      id: Date.now(),
-      author: '나',
-      content: commentText,
-      time: '방금 전'
-    };
-
-    setPosts(prev => prev.map(post => 
-      post.id === postId 
-        ? { ...post, comments: [...post.comments, newComment] }
-        : post
-    ));
-
-    setCommentInputs({ ...commentInputs, [postId]: '' });
   };
 
   // 게시물 추가
@@ -481,232 +464,185 @@ export default function ExplorePage() {
                     </div>
                   )}
 
-                  {/* 액션 버튼 */}
+                  {/* 고양이 반응 버튼 */}
                   <div style={{
-                    padding: '12px 16px',
-                    borderTop: '1px solid #f3f4f6'
+                    padding: '16px',
+                    borderTop: '1px solid #f3f4f6',
+                    background: '#fafafa'
                   }}>
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '24px'
+                      justifyContent: 'space-around',
+                      gap: '12px'
                     }}>
+                      {/* 한잔해~ (drink) */}
                       <button 
-                        onClick={() => toggleLike(post.id)}
+                        onClick={() => toggleReaction(post.id, 'drink')}
                         style={{
                           display: 'flex',
+                          flexDirection: 'column',
                           alignItems: 'center',
-                          gap: '8px',
-                          color: '#6b7280',
-                          background: 'none',
-                          border: 'none',
+                          gap: '6px',
+                          background: post.userReaction === 'drink' ? '#fef3c7' : 'transparent',
+                          border: post.userReaction === 'drink' ? '2px solid #f59e0b' : '2px solid transparent',
+                          borderRadius: '12px',
+                          padding: '12px 16px',
                           cursor: 'pointer',
-                          transition: 'color 0.2s ease',
-                          fontSize: '14px',
-                          fontWeight: '600'
+                          transition: 'all 0.2s ease',
+                          minWidth: '80px'
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.color = '#dc2626';
+                          if (post.userReaction !== 'drink') {
+                            e.currentTarget.style.background = '#f3f4f6';
+                          }
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.color = '#6b7280';
+                          if (post.userReaction !== 'drink') {
+                            e.currentTarget.style.background = 'transparent';
+                          }
                         }}
                       >
-                        <span style={{ fontSize: '18px' }}>❤️</span>
-                        <span>{post.likes}</span>
+                        <img 
+                          src="/assets/reaction/drink.png" 
+                          alt="한잔해~" 
+                          style={{
+                            width: '32px',
+                            height: '32px',
+                            objectFit: 'contain'
+                          }}
+                        />
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '2px'
+                        }}>
+                          <span style={{
+                            fontSize: '11px',
+                            fontWeight: '600',
+                            color: '#6b7280'
+                          }}>한잔해~</span>
+                          <span style={{
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            color: post.userReaction === 'drink' ? '#f59e0b' : '#9ca3af'
+                          }}>{post.reactions.drink}</span>
+                        </div>
                       </button>
+
+                      {/* 나도! (metoo) */}
                       <button 
-                        onClick={() => toggleComments(post.id)}
+                        onClick={() => toggleReaction(post.id, 'metoo')}
                         style={{
                           display: 'flex',
+                          flexDirection: 'column',
                           alignItems: 'center',
-                          gap: '8px',
-                          color: '#6b7280',
-                          background: 'none',
-                          border: 'none',
+                          gap: '6px',
+                          background: post.userReaction === 'metoo' ? '#dbeafe' : 'transparent',
+                          border: post.userReaction === 'metoo' ? '2px solid #3b82f6' : '2px solid transparent',
+                          borderRadius: '12px',
+                          padding: '12px 16px',
                           cursor: 'pointer',
-                          transition: 'color 0.2s ease',
-                          fontSize: '14px',
-                          fontWeight: '600'
+                          transition: 'all 0.2s ease',
+                          minWidth: '80px'
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.color = '#2563eb';
+                          if (post.userReaction !== 'metoo') {
+                            e.currentTarget.style.background = '#f3f4f6';
+                          }
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.color = '#6b7280';
+                          if (post.userReaction !== 'metoo') {
+                            e.currentTarget.style.background = 'transparent';
+                          }
                         }}
                       >
-                        <span style={{ fontSize: '18px' }}>💬</span>
-                        <span>{post.comments.length}</span>
+                        <img 
+                          src="/assets/reaction/metoo.png" 
+                          alt="나도!" 
+                          style={{
+                            width: '32px',
+                            height: '32px',
+                            objectFit: 'contain'
+                          }}
+                        />
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '2px'
+                        }}>
+                          <span style={{
+                            fontSize: '11px',
+                            fontWeight: '600',
+                            color: '#6b7280'
+                          }}>나도!</span>
+                          <span style={{
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            color: post.userReaction === 'metoo' ? '#3b82f6' : '#9ca3af'
+                          }}>{post.reactions.metoo}</span>
+                        </div>
                       </button>
-                      <button style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        color: '#6b7280',
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        transition: 'color 0.2s ease',
-                        fontSize: '14px',
-                        fontWeight: '600'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.color = '#059669';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.color = '#6b7280';
-                      }}
+
+                      {/* 괜찮아 (thatsok) */}
+                      <button 
+                        onClick={() => toggleReaction(post.id, 'thatsok')}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: post.userReaction === 'thatsok' ? '#dcfce7' : 'transparent',
+                          border: post.userReaction === 'thatsok' ? '2px solid #22c55e' : '2px solid transparent',
+                          borderRadius: '12px',
+                          padding: '12px 16px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          minWidth: '80px'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (post.userReaction !== 'thatsok') {
+                            e.currentTarget.style.background = '#f3f4f6';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (post.userReaction !== 'thatsok') {
+                            e.currentTarget.style.background = 'transparent';
+                          }
+                        }}
                       >
-                        <span style={{ fontSize: '18px' }}>📤</span>
-                        <span>공유</span>
+                        <img 
+                          src="/assets/reaction/thatsok.png" 
+                          alt="괜찮아" 
+                          style={{
+                            width: '32px',
+                            height: '32px',
+                            objectFit: 'contain'
+                          }}
+                        />
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '2px'
+                        }}>
+                          <span style={{
+                            fontSize: '11px',
+                            fontWeight: '600',
+                            color: '#6b7280'
+                          }}>괜찮아</span>
+                          <span style={{
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            color: post.userReaction === 'thatsok' ? '#22c55e' : '#9ca3af'
+                          }}>{post.reactions.thatsok}</span>
+                        </div>
                       </button>
                     </div>
                   </div>
 
-                  {/* 댓글 섹션 */}
-                  {post.showComments && (
-                    <div style={{
-                      borderTop: '1px solid #f3f4f6',
-                      background: '#f9fafb'
-                    }}>
-                      
-                      {/* 기존 댓글 */}
-                      {post.comments.length > 0 && (
-                        <div style={{
-                          padding: '16px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '12px'
-                        }}>
-                          {post.comments.map(comment => (
-                            <div key={comment.id} style={{
-                              display: 'flex',
-                              gap: '12px'
-                            }}>
-                              <div style={{
-                                width: '32px',
-                                height: '32px',
-                                background: 'linear-gradient(135deg, #6b7280, #4b5563)',
-                                borderRadius: '50%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'white',
-                                fontWeight: 'bold',
-                                fontSize: '14px'
-                              }}>
-                                {comment.author[0]}
-                              </div>
-                              <div style={{ flex: 1 }}>
-                                <div style={{
-                                  background: 'white',
-                                  borderRadius: '12px',
-                                  padding: '12px'
-                                }}>
-                                  <h4 style={{
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    color: '#1f2937',
-                                    margin: '0 0 4px 0'
-                                  }}>{comment.author}</h4>
-                                  <p style={{
-                                    fontSize: '14px',
-                                    color: '#374151',
-                                    margin: 0
-                                  }}>{comment.content}</p>
-                                </div>
-                                <p style={{
-                                  fontSize: '12px',
-                                  color: '#6b7280',
-                                  margin: '4px 0 0 12px'
-                                }}>{comment.time}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* 댓글 입력 */}
-                      <div style={{
-                        padding: '16px',
-                        borderTop: '1px solid #e5e7eb'
-                      }}>
-                        <div style={{
-                          display: 'flex',
-                          gap: '12px'
-                        }}>
-                          <div style={{
-                            width: '32px',
-                            height: '32px',
-                            background: 'linear-gradient(135deg, #1f2937, #4b5563)',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'white',
-                            fontWeight: 'bold',
-                            fontSize: '14px'
-                          }}>
-                            나
-                          </div>
-                          <div style={{
-                            flex: 1,
-                            display: 'flex',
-                            gap: '8px'
-                          }}>
-                            <input
-                              type="text"
-                              placeholder="댓글을 입력하세요..."
-                              value={commentInputs[post.id] || ''}
-                              onChange={(e) => setCommentInputs({ ...commentInputs, [post.id]: e.target.value })}
-                              onKeyPress={(e) => e.key === 'Enter' && addComment(post.id)}
-                              style={{
-                                flex: 1,
-                                padding: '8px 12px',
-                                background: 'white',
-                                border: '1px solid #d1d5db',
-                                borderRadius: '12px',
-                                fontSize: '14px',
-                                outline: 'none',
-                                transition: 'all 0.2s ease'
-                              }}
-                              onFocus={(e) => {
-                                e.currentTarget.style.borderColor = '#6b7280';
-                                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(107, 114, 128, 0.1)';
-                              }}
-                              onBlur={(e) => {
-                                e.currentTarget.style.borderColor = '#d1d5db';
-                                e.currentTarget.style.boxShadow = 'none';
-                              }}
-                            />
-                            <button
-                              onClick={() => addComment(post.id)}
-                              style={{
-                                padding: '8px 16px',
-                                background: '#1f2937',
-                                color: 'white',
-                                borderRadius: '12px',
-                                fontSize: '14px',
-                                fontWeight: '600',
-                                border: 'none',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s ease'
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.background = '#111827';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.background = '#1f2937';
-                              }}
-                            >
-                              게시
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               ))
             ) : (
