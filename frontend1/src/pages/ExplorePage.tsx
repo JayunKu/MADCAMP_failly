@@ -12,11 +12,11 @@ interface Post {
   image_url: string;
   created_at: string;
   reactions: {
-    drink: number;
-    metoo: number;
-    thatsok: number;
+    'drink!': number;
+    'me too': number;
+    'it\'s okay': number;
   };
-  userReaction?: 'drink' | 'metoo' | 'thatsok' | null;
+  userReaction?: 'drink!' | 'me too' | 'it\'s okay' | null;
 }
 
 export default function ExplorePage() {
@@ -69,9 +69,9 @@ export default function ExplorePage() {
       const transformedPosts: Post[] = fetchedPosts.map(post => ({
         ...post,
         reactions: {
-          drink: 0,
-          metoo: 0,
-          thatsok: 0
+          'drink!': 0,
+          'me too': 0,
+          'it\'s okay': 0
         },
         userReaction: null
       }));
@@ -91,7 +91,7 @@ export default function ExplorePage() {
   }, [selectedCategory]);
 
   // 반응 토글
-  const toggleReaction = async (postId: string, reactionType: 'drink' | 'metoo' | 'thatsok') => {
+  const toggleReaction = async (postId: string, reactionType: 'drink!' | 'me too' | 'it\'s okay') => {
     try {
       setPosts(prev => prev.map(post => {
         if (post.id === postId) {
@@ -476,16 +476,16 @@ export default function ExplorePage() {
                       justifyContent: 'space-around',
                       gap: '12px'
                     }}>
-                      {/* 한잔해~ (drink) */}
+                      {/* 한잔해~ (drink!) */}
                       <button 
-                        onClick={() => toggleReaction(post.id, 'drink')}
+                        onClick={() => toggleReaction(post.id, 'drink!')}
                         style={{
                           display: 'flex',
                           flexDirection: 'column',
                           alignItems: 'center',
                           gap: '6px',
-                          background: post.userReaction === 'drink' ? '#fef3c7' : 'transparent',
-                          border: post.userReaction === 'drink' ? '2px solid #f59e0b' : '2px solid transparent',
+                          background: post.userReaction === 'drink!' ? '#fef3c7' : 'transparent',
+                          border: post.userReaction === 'drink!' ? '2px solid #f59e0b' : '2px solid transparent',
                           borderRadius: '12px',
                           padding: '12px 16px',
                           cursor: 'pointer',
@@ -493,12 +493,12 @@ export default function ExplorePage() {
                           minWidth: '80px'
                         }}
                         onMouseEnter={(e) => {
-                          if (post.userReaction !== 'drink') {
+                          if (post.userReaction !== 'drink!') {
                             e.currentTarget.style.background = '#f3f4f6';
                           }
                         }}
                         onMouseLeave={(e) => {
-                          if (post.userReaction !== 'drink') {
+                          if (post.userReaction !== 'drink!') {
                             e.currentTarget.style.background = 'transparent';
                           }
                         }}
@@ -526,21 +526,21 @@ export default function ExplorePage() {
                           <span style={{
                             fontSize: '12px',
                             fontWeight: 'bold',
-                            color: post.userReaction === 'drink' ? '#f59e0b' : '#9ca3af'
-                          }}>{post.reactions.drink}</span>
+                            color: post.userReaction === 'drink!' ? '#f59e0b' : '#9ca3af'
+                          }}>{post.reactions['drink!']}</span>
                         </div>
                       </button>
 
-                      {/* 나도! (metoo) */}
+                      {/* 나도! (me too) */}
                       <button 
-                        onClick={() => toggleReaction(post.id, 'metoo')}
+                        onClick={() => toggleReaction(post.id, 'me too')}
                         style={{
                           display: 'flex',
                           flexDirection: 'column',
                           alignItems: 'center',
                           gap: '6px',
-                          background: post.userReaction === 'metoo' ? '#dbeafe' : 'transparent',
-                          border: post.userReaction === 'metoo' ? '2px solid #3b82f6' : '2px solid transparent',
+                          background: post.userReaction === 'me too' ? '#dbeafe' : 'transparent',
+                          border: post.userReaction === 'me too' ? '2px solid #3b82f6' : '2px solid transparent',
                           borderRadius: '12px',
                           padding: '12px 16px',
                           cursor: 'pointer',
@@ -548,12 +548,12 @@ export default function ExplorePage() {
                           minWidth: '80px'
                         }}
                         onMouseEnter={(e) => {
-                          if (post.userReaction !== 'metoo') {
+                          if (post.userReaction !== 'me too') {
                             e.currentTarget.style.background = '#f3f4f6';
                           }
                         }}
                         onMouseLeave={(e) => {
-                          if (post.userReaction !== 'metoo') {
+                          if (post.userReaction !== 'me too') {
                             e.currentTarget.style.background = 'transparent';
                           }
                         }}
@@ -581,21 +581,21 @@ export default function ExplorePage() {
                           <span style={{
                             fontSize: '12px',
                             fontWeight: 'bold',
-                            color: post.userReaction === 'metoo' ? '#3b82f6' : '#9ca3af'
-                          }}>{post.reactions.metoo}</span>
+                            color: post.userReaction === 'me too' ? '#3b82f6' : '#9ca3af'
+                          }}>{post.reactions['me too']}</span>
                         </div>
                       </button>
 
-                      {/* 괜찮아 (thatsok) */}
+                      {/* 괜찮아 (it's okay) */}
                       <button 
-                        onClick={() => toggleReaction(post.id, 'thatsok')}
+                        onClick={() => toggleReaction(post.id, 'it\'s okay')}
                         style={{
                           display: 'flex',
                           flexDirection: 'column',
                           alignItems: 'center',
                           gap: '6px',
-                          background: post.userReaction === 'thatsok' ? '#dcfce7' : 'transparent',
-                          border: post.userReaction === 'thatsok' ? '2px solid #22c55e' : '2px solid transparent',
+                          background: post.userReaction === 'it\'s okay' ? '#dcfce7' : 'transparent',
+                          border: post.userReaction === 'it\'s okay' ? '2px solid #22c55e' : '2px solid transparent',
                           borderRadius: '12px',
                           padding: '12px 16px',
                           cursor: 'pointer',
@@ -603,12 +603,12 @@ export default function ExplorePage() {
                           minWidth: '80px'
                         }}
                         onMouseEnter={(e) => {
-                          if (post.userReaction !== 'thatsok') {
+                          if (post.userReaction !== 'it\'s okay') {
                             e.currentTarget.style.background = '#f3f4f6';
                           }
                         }}
                         onMouseLeave={(e) => {
-                          if (post.userReaction !== 'thatsok') {
+                          if (post.userReaction !== 'it\'s okay') {
                             e.currentTarget.style.background = 'transparent';
                           }
                         }}
@@ -636,8 +636,8 @@ export default function ExplorePage() {
                           <span style={{
                             fontSize: '12px',
                             fontWeight: 'bold',
-                            color: post.userReaction === 'thatsok' ? '#22c55e' : '#9ca3af'
-                          }}>{post.reactions.thatsok}</span>
+                            color: post.userReaction === 'it\'s okay' ? '#22c55e' : '#9ca3af'
+                          }}>{post.reactions['it\'s okay']}</span>
                         </div>
                       </button>
                     </div>
