@@ -98,13 +98,13 @@ async function runApiTests() {
       //   console.error('❌ deleteFailpost test error:', err instanceof Error ? err.message : err);
       // }
       // 게시물 리액션 추가 테스트
-      try {
-        const targetFailpostId = 'c758a67e-5078-4335-8d6e-98decf66fa7f'; // 여기에 실제 존재하는 failpost ID 사용
-        const reaction = await addFailpostReaction(targetFailpostId, "it's okay")
-        console.log('✅ addFailpostReaction:', reaction);
-      } catch (err) {
-        console.error('❌ addFailpostReaction error:', err instanceof Error ? err.message : err);
-      }
+      // try {
+      //   const targetFailpostId = 'c758a67e-5078-4335-8d6e-98decf66fa7f'; // 여기에 실제 존재하는 failpost ID 사용
+      //   const reaction = await addFailpostReaction(targetFailpostId, "it's okay")
+      //   console.log('✅ addFailpostReaction:', reaction);
+      // } catch (err) {
+      //   console.error('❌ addFailpostReaction error:', err instanceof Error ? err.message : err);
+      // }
       
       
     }

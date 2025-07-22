@@ -75,11 +75,11 @@ export const createFailpost = async (payload: CreateFailpostPayload) => {
 };
 
 // Zod 스키마로 addFailpostReaction 요청 및 응답 타입을 정의합니다.
-const addReactionPayloadSchema = z.object({
-  reaction_type: z.string(),
-});
+// const addReactionPayloadSchema = z.object({
+//   reaction_type: z.string(),
+// });
 
-type AddReactionPayload = z.infer<typeof addReactionPayloadSchema>;
+//type AddReactionPayload = z.infer<typeof addReactionPayloadSchema>;
 
 const addReactionResponseSchema = z.object({
   message: z.literal('success'),
