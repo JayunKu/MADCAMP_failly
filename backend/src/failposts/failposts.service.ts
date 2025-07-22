@@ -156,48 +156,62 @@ export class FailpostsService {
   }
 
   async addFailpostReaction(id: string, addReactionDto: any) {
-    const { reaction_type, delta } = addReactionDto;
+  const { reaction_type, delta } = addReactionDto;
 
-    const failpost = await this.prisma.failPost.findUnique({
-      where: { id },
-    });
+  const failpost = await this.prisma.failPost.findUnique({
+    where: { id },
+  });
 
-    console.log('add reaction: ', reaction_type);
+  if (!failpost) {
+    throw new NotFoundException('failpost not found');
+  }
 
-    if (!failpost) {
-      throw new NotFoundException('failpost not found');
-    }
+  const reaction = await this.prisma.reaction.findUnique({
+    where: { reaction_type },
+  });
 
-    const reaction = await this.prisma.reaction.findUnique({
-      where: { reaction_type },
-    });
+  if (!reaction) {
+    throw new BadRequestException('invalid reaction type');
+  }
 
-    if (!reaction) {
-      console.log('invalid reaction type')
-      throw new BadRequestException('invalid reaction type');
-    }
+  // 기존 반응 count 불러오기 (없으면 0으로 간주)
+  const existing = await this.prisma.failpostReactionCount.findUnique({
+    where: {
+      failpost_id_reaction_type: {
+        failpost_id: id,
+        reaction_type,
+      },
+    },
+  });
 
-    await this.prisma.failpostReactionCount.upsert({
+  const currentCount = existing?.count ?? 0;
+  const newCount = Math.max(0, currentCount + delta);
+
+  if (existing) {
+    await this.prisma.failpostReactionCount.update({
       where: {
         failpost_id_reaction_type: {
           failpost_id: id,
           reaction_type,
         },
       },
-      update: {
-        count: {
-          increment: 1,
-        },
-      },
-      create: {
-        failpost_id: id,
-        reaction_type,
-        count: 1,
+      data: {
+        count: newCount,
       },
     });
-
-    console.log('add reaction 성공');
-
-    return { message: 'success' };
+  } else {
+    await this.prisma.failpostReactionCount.create({
+      data: {
+        failpost_id: id,
+        reaction_type,
+        count: newCount,
+      },
+    });
   }
+
+  console.log('reaction count changed');
+
+  return { message: 'success' };
+}
+
 }

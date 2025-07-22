@@ -92,6 +92,7 @@ export default function ExplorePage() {
 
   // 반응 토글
   const toggleReaction = async (postId: string, reactionType: 'drink!' | 'me too' | 'it\'s okay') => {
+    let delta = 1
     try {
       setPosts(prev => prev.map(post => {
         if (post.id === postId) {
@@ -117,7 +118,7 @@ export default function ExplorePage() {
       }));
       
       // 실제 API 호출 (반응 추가)
-      await addFailpostReaction(postId, reactionType, 1);
+      await addFailpostReaction(postId, reactionType, -1);
     } catch (err) {
       console.error('Failed to toggle reaction:', err);
     }
