@@ -1,5 +1,6 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { getFailposts, createFailpost, addFailpostReaction } from "../api/failposts";
 
 interface Comment {
   id: number;
@@ -9,12 +10,14 @@ interface Comment {
 }
 
 interface Post {
-  id: number;
-  author: string;
-  content: string;
-  time: string;
+  id: string;
+  user_id: string;
+  nickname: string;
+  text: string;
+  tag: string;
+  image_url: string;
+  created_at: string;
   likes: number;
-  image: string | null;
   comments: Comment[];
   showComments: boolean;
 }
@@ -24,80 +27,11 @@ export default function ExplorePage() {
   const [selectedCategory, setSelectedCategory] = useState('지각');
   const [showWriteModal, setShowWriteModal] = useState(false);
   const [newPost, setNewPost] = useState('');
-  const [postsByCategory, setPostsByCategory] = useState<{[key: string]: Post[]}>({
-    '지각': [
-      { 
-        id: 1, 
-        author: '지각왕', 
-        content: '또 지각했어요... 알람을 5개나 맞췄는데도 😭', 
-        time: '10분 전', 
-        likes: 12, 
-        image: null,
-        comments: [
-          { id: 1, author: '공감러', content: '저도 매일 그래요 ㅠㅠ', time: '5분 전' },
-          { id: 2, author: '조언자', content: '알람을 침대에서 멀리 두세요!', time: '3분 전' }
-        ],
-        showComments: false
-      },
-      { 
-        id: 2, 
-        author: '늦잠러버', 
-        content: '오늘도 15분 지각.. 상사가 째려보네요 ㅠㅠ', 
-        time: '1시간 전', 
-        likes: 8, 
-        image: null,
-        comments: [
-          { id: 3, author: '위로봇', content: '힘내세요! 내일은 일찍 일어나실 거예요', time: '30분 전' }
-        ],
-        showComments: false
-      },
-      { 
-        id: 3, 
-        author: '타임마스터', 
-        content: '지각 기록 갱신! 30분 늦었어요 🏃‍♂️', 
-        time: '2시간 전', 
-        likes: 15, 
-        image: null,
-        comments: [],
-        showComments: false
-      }
-    ],
-    '시험 망함': [
-      { 
-        id: 4, 
-        author: '공부싫어', 
-        content: '중간고사 망했어요... 다시 공부해야겠네요 📚', 
-        time: '30분 전', 
-        likes: 20, 
-        image: null,
-        comments: [],
-        showComments: false
-      },
-      { 
-        id: 5, 
-        author: '야매학생', 
-        content: '벼락치기의 한계를 느꼈습니다', 
-        time: '2시간 전', 
-        likes: 7, 
-        image: null,
-        comments: [],
-        showComments: false
-      }
-    ],
-    '다이어트 실패': [
-      { 
-        id: 6, 
-        author: '치킨러버', 
-        content: '다이어트 시작한지 3일만에 치킨 시켰어요... 🍗', 
-        time: '1시간 전', 
-        likes: 25, 
-        image: null,
-        comments: [],
-        showComments: false
-      }
-    ]
-  });
-  const [commentInputs, setCommentInputs] = useState<{[key: number]: string}>({});
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [commentInputs, setCommentInputs] = useState<{[key: string]: string}>({});
 
   // 실패 카테고리 목록
   const failCategories = [
@@ -115,35 +49,76 @@ export default function ExplorePage() {
     { id: 'smoking', name: '금연 실패', icon: '🚭' },
   ];
 
-  const toggleLike = (postId: number) => {
-    setPostsByCategory(prev => {
-      const newPosts = { ...prev };
-      Object.keys(newPosts).forEach(category => {
-        newPosts[category] = newPosts[category].map(post => 
-          post.id === postId 
-            ? { ...post, likes: post.likes + 1 }
-            : post
-        );
-      });
-      return newPosts;
-    });
+  // 시간 포맷 함수
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return '방금 전';
+    if (diffInMinutes < 60) return `${diffInMinutes}분 전`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}시간 전`;
+    return `${Math.floor(diffInMinutes / 1440)}일 전`;
   };
 
-  const toggleComments = (postId: number) => {
-    setPostsByCategory(prev => {
-      const newPosts = { ...prev };
-      Object.keys(newPosts).forEach(category => {
-        newPosts[category] = newPosts[category].map(post => 
-          post.id === postId 
-            ? { ...post, showComments: !post.showComments }
-            : post
-        );
-      });
-      return newPosts;
-    });
+  // 게시물 로드
+  const loadPosts = async (tag?: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const fetchedPosts = await getFailposts(tag);
+      
+      // API 응답을 UI에 맞게 변환
+      const transformedPosts: Post[] = fetchedPosts.map(post => ({
+        ...post,
+        likes: 0, // 백엔드에서 likes 정보가 없으므로 기본값 설정
+        comments: [], // 댓글은 별도 API로 구현 필요
+        showComments: false
+      }));
+      
+      setPosts(transformedPosts);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '게시물을 불러오는데 실패했습니다.');
+      console.error('Failed to load posts:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const addComment = (postId: number) => {
+  // 컴포넌트 마운트 시 게시물 로드
+  useEffect(() => {
+    loadPosts(selectedCategory);
+  }, [selectedCategory]);
+
+  // 좋아요 토글
+  const toggleLike = async (postId: string) => {
+    try {
+      // 실제로는 addFailpostReaction API를 사용해야 하지만, 
+      // 현재는 UI만 업데이트
+      setPosts(prev => prev.map(post => 
+        post.id === postId 
+          ? { ...post, likes: post.likes + 1 }
+          : post
+      ));
+      
+      // 실제 API 호출 (반응 추가)
+      // await addFailpostReaction(postId, 'like');
+    } catch (err) {
+      console.error('Failed to toggle like:', err);
+    }
+  };
+
+  // 댓글 토글
+  const toggleComments = (postId: string) => {
+    setPosts(prev => prev.map(post => 
+      post.id === postId 
+        ? { ...post, showComments: !post.showComments }
+        : post
+    ));
+  };
+
+  // 댓글 추가
+  const addComment = (postId: string) => {
     const commentText = commentInputs[postId];
     if (!commentText?.trim()) return;
 
@@ -154,46 +129,50 @@ export default function ExplorePage() {
       time: '방금 전'
     };
 
-    setPostsByCategory(prev => {
-      const newPosts = { ...prev };
-      Object.keys(newPosts).forEach(category => {
-        newPosts[category] = newPosts[category].map(post => 
-          post.id === postId 
-            ? { ...post, comments: [...post.comments, newComment] }
-            : post
-        );
-      });
-      return newPosts;
-    });
+    setPosts(prev => prev.map(post => 
+      post.id === postId 
+        ? { ...post, comments: [...post.comments, newComment] }
+        : post
+    ));
 
     setCommentInputs({ ...commentInputs, [postId]: '' });
   };
 
-  const addPost = () => {
+  // 게시물 추가
+  const addPost = async () => {
     if (!newPost.trim()) return;
 
-    const post: Post = {
-      id: Date.now(),
-      author: '나',
-      content: newPost,
-      time: '방금 전',
-      likes: 0,
-      image: null,
-      comments: [],
-      showComments: false
-    };
+    try {
+      setLoading(true);
+      
+      // 실제 API 호출
+      const result = await createFailpost({
+        user_id: 'temp-user-id', // 실제로는 로그인된 사용자 ID를 사용
+        text: newPost,
+        tag: selectedCategory,
+        image: selectedImage || undefined
+      });
 
-    setPostsByCategory(prev => ({
-      ...prev,
-      [selectedCategory]: [post, ...(prev[selectedCategory] || [])]
-    }));
-    
-    setNewPost('');
-    setShowWriteModal(false);
+      // 성공 시 게시물 목록 새로고침
+      await loadPosts(selectedCategory);
+      
+      setNewPost('');
+      setSelectedImage(null);
+      setShowWriteModal(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '게시물 작성에 실패했습니다.');
+      console.error('Failed to create post:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getCurrentPosts = () => {
-    return postsByCategory[selectedCategory] || [];
+  // 이미지 선택 핸들러
+  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+    }
   };
 
   return (
@@ -262,29 +241,34 @@ export default function ExplorePage() {
           </div>
           <button
             onClick={() => setShowWriteModal(true)}
+            disabled={loading}
             style={{
               padding: '8px 16px',
-              background: '#1f2937',
+              background: loading ? '#9ca3af' : '#1f2937',
               color: 'white',
               borderRadius: '12px',
               fontWeight: '600',
               border: 'none',
-              cursor: 'pointer',
+              cursor: loading ? 'not-allowed' : 'pointer',
               transition: 'all 0.3s ease',
               boxShadow: '0 4px 15px rgba(31, 41, 55, 0.3)'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#111827';
-              e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = '0 6px 20px rgba(31, 41, 55, 0.4)';
+              if (!loading) {
+                e.currentTarget.style.background = '#111827';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(31, 41, 55, 0.4)';
+              }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#1f2937';
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 15px rgba(31, 41, 55, 0.3)';
+              if (!loading) {
+                e.currentTarget.style.background = '#1f2937';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 15px rgba(31, 41, 55, 0.3)';
+              }
             }}
           >
-            + 게시물 작성
+            {loading ? '로딩...' : '+ 게시물 작성'}
           </button>
         </div>
       </div>
@@ -314,6 +298,7 @@ export default function ExplorePage() {
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.name)}
+                disabled={loading}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -323,20 +308,21 @@ export default function ExplorePage() {
                   whiteSpace: 'nowrap',
                   transition: 'all 0.2s ease',
                   border: 'none',
-                  cursor: 'pointer',
+                  cursor: loading ? 'not-allowed' : 'pointer',
                   fontSize: '14px',
                   fontWeight: '600',
                   background: selectedCategory === category.name ? '#1f2937' : '#f3f4f6',
                   color: selectedCategory === category.name ? 'white' : '#374151',
-                  boxShadow: selectedCategory === category.name ? '0 4px 15px rgba(31, 41, 55, 0.3)' : 'none'
+                  boxShadow: selectedCategory === category.name ? '0 4px 15px rgba(31, 41, 55, 0.3)' : 'none',
+                  opacity: loading ? 0.6 : 1
                 }}
                 onMouseEnter={(e) => {
-                  if (selectedCategory !== category.name) {
+                  if (selectedCategory !== category.name && !loading) {
                     e.currentTarget.style.background = '#e5e7eb';
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (selectedCategory !== category.name) {
+                  if (selectedCategory !== category.name && !loading) {
                     e.currentTarget.style.background = '#f3f4f6';
                   }
                 }}
@@ -349,353 +335,419 @@ export default function ExplorePage() {
         </div>
       </div>
 
+      {/* 에러 메시지 */}
+      {error && (
+        <div style={{
+          maxWidth: '600px',
+          margin: '16px auto',
+          padding: '12px 16px',
+          background: '#fef2f2',
+          border: '1px solid #fecaca',
+          borderRadius: '12px',
+          color: '#dc2626',
+          fontSize: '14px'
+        }}>
+          {error}
+          <button
+            onClick={() => setError(null)}
+            style={{
+              marginLeft: '8px',
+              background: 'none',
+              border: 'none',
+              color: '#dc2626',
+              cursor: 'pointer',
+              fontSize: '16px'
+            }}
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {/* 메인 피드 */}
       <div style={{
         maxWidth: '600px',
         margin: '0 auto',
         padding: '24px 16px'
       }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-          {getCurrentPosts().length > 0 ? (
-            getCurrentPosts().map(post => (
-              <div key={post.id} style={{
-                background: 'white',
-                borderRadius: '20px',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-                border: '1px solid #e5e7eb',
-                overflow: 'hidden',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.15)';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-              >
-              
-                {/* 게시물 헤더 */}
-                <div style={{
-                  padding: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px'
-                }}>
+        {loading && posts.length === 0 ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '64px 0',
+            color: '#6b7280'
+          }}>
+            <div style={{ fontSize: '2rem', marginBottom: '16px' }}>⏳</div>
+            <p>게시물을 불러오는 중...</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+            {posts.length > 0 ? (
+              posts.map(post => (
+                <div key={post.id} style={{
+                  background: 'white',
+                  borderRadius: '20px',
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                  border: '1px solid #e5e7eb',
+                  overflow: 'hidden',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.15)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+                >
+                
+                  {/* 게시물 헤더 */}
                   <div style={{
-                    width: '40px',
-                    height: '40px',
-                    background: 'linear-gradient(135deg, #1f2937, #4b5563)',
-                    borderRadius: '50%',
+                    padding: '16px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontWeight: 'bold'
+                    gap: '12px'
                   }}>
-                    {post.author[0]}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{
-                      fontWeight: '600',
-                      color: '#1f2937',
-                      margin: 0,
-                      fontSize: '16px'
-                    }}>{post.author}</h3>
-                    <p style={{
-                      fontSize: '14px',
-                      color: '#6b7280',
-                      margin: 0
-                    }}>{post.time}</p>
-                  </div>
-                </div>
-
-                {/* 게시물 내용 */}
-                <div style={{ padding: '0 16px 12px' }}>
-                  <p style={{
-                    color: '#374151',
-                    lineHeight: '1.6',
-                    margin: 0,
-                    fontSize: '15px'
-                  }}>{post.content}</p>
-                </div>
-
-                {/* 액션 버튼 */}
-                <div style={{
-                  padding: '12px 16px',
-                  borderTop: '1px solid #f3f4f6'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '24px'
-                  }}>
-                    <button 
-                      onClick={() => toggleLike(post.id)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        color: '#6b7280',
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        transition: 'color 0.2s ease',
-                        fontSize: '14px',
-                        fontWeight: '600'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.color = '#dc2626';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.color = '#6b7280';
-                      }}
-                    >
-                      <span style={{ fontSize: '18px' }}>❤️</span>
-                      <span>{post.likes}</span>
-                    </button>
-                    <button 
-                      onClick={() => toggleComments(post.id)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        color: '#6b7280',
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        transition: 'color 0.2s ease',
-                        fontSize: '14px',
-                        fontWeight: '600'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.color = '#2563eb';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.color = '#6b7280';
-                      }}
-                    >
-                      <span style={{ fontSize: '18px' }}>💬</span>
-                      <span>{post.comments.length}</span>
-                    </button>
-                    <button style={{
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      background: 'linear-gradient(135deg, #1f2937, #4b5563)',
+                      borderRadius: '50%',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '8px',
-                      color: '#6b7280',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'color 0.2s ease',
-                      fontSize: '14px',
-                      fontWeight: '600'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.color = '#059669';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.color = '#6b7280';
-                    }}
-                    >
-                      <span style={{ fontSize: '18px' }}>📤</span>
-                      <span>공유</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* 댓글 섹션 */}
-                {post.showComments && (
-                  <div style={{
-                    borderTop: '1px solid #f3f4f6',
-                    background: '#f9fafb'
-                  }}>
-                    
-                    {/* 기존 댓글 */}
-                    {post.comments.length > 0 && (
-                      <div style={{
-                        padding: '16px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '12px'
-                      }}>
-                        {post.comments.map(comment => (
-                          <div key={comment.id} style={{
-                            display: 'flex',
-                            gap: '12px'
-                          }}>
-                            <div style={{
-                              width: '32px',
-                              height: '32px',
-                              background: 'linear-gradient(135deg, #6b7280, #4b5563)',
-                              borderRadius: '50%',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              color: 'white',
-                              fontWeight: 'bold',
-                              fontSize: '14px'
-                            }}>
-                              {comment.author[0]}
-                            </div>
-                            <div style={{ flex: 1 }}>
-                              <div style={{
-                                background: 'white',
-                                borderRadius: '12px',
-                                padding: '12px'
-                              }}>
-                                <h4 style={{
-                                  fontWeight: '600',
-                                  fontSize: '14px',
-                                  color: '#1f2937',
-                                  margin: '0 0 4px 0'
-                                }}>{comment.author}</h4>
-                                <p style={{
-                                  fontSize: '14px',
-                                  color: '#374151',
-                                  margin: 0
-                                }}>{comment.content}</p>
-                              </div>
-                              <p style={{
-                                fontSize: '12px',
-                                color: '#6b7280',
-                                margin: '4px 0 0 12px'
-                              }}>{comment.time}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* 댓글 입력 */}
-                    <div style={{
-                      padding: '16px',
-                      borderTop: '1px solid #e5e7eb'
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontWeight: 'bold'
                     }}>
-                      <div style={{
-                        display: 'flex',
-                        gap: '12px'
-                      }}>
-                        <div style={{
-                          width: '32px',
-                          height: '32px',
-                          background: 'linear-gradient(135deg, #1f2937, #4b5563)',
-                          borderRadius: '50%',
+                      {post.nickname ? post.nickname[0] : 'U'}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{
+                        fontWeight: '600',
+                        color: '#1f2937',
+                        margin: 0,
+                        fontSize: '16px'
+                      }}>{post.nickname || '익명'}</h3>
+                      <p style={{
+                        fontSize: '14px',
+                        color: '#6b7280',
+                        margin: 0
+                      }}>{formatTime(post.created_at)}</p>
+                    </div>
+                    <div style={{
+                      padding: '4px 12px',
+                      background: '#f3f4f6',
+                      borderRadius: '12px',
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      color: '#6b7280'
+                    }}>
+                      {post.tag}
+                    </div>
+                  </div>
+
+                  {/* 게시물 내용 */}
+                  <div style={{ padding: '0 16px 12px' }}>
+                    <p style={{
+                      color: '#374151',
+                      lineHeight: '1.6',
+                      margin: 0,
+                      fontSize: '15px'
+                    }}>{post.text}</p>
+                  </div>
+
+                  {/* 이미지 */}
+                  {post.image_url && (
+                    <div style={{ padding: '0 16px 12px' }}>
+                      <img 
+                        src={post.image_url} 
+                        alt="게시물 이미지"
+                        style={{
+                          width: '100%',
+                          borderRadius: '12px',
+                          maxHeight: '300px',
+                          objectFit: 'cover'
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {/* 액션 버튼 */}
+                  <div style={{
+                    padding: '12px 16px',
+                    borderTop: '1px solid #f3f4f6'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '24px'
+                    }}>
+                      <button 
+                        onClick={() => toggleLike(post.id)}
+                        style={{
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: 'center',
-                          color: 'white',
-                          fontWeight: 'bold',
-                          fontSize: '14px'
-                        }}>
-                          나
-                        </div>
-                        <div style={{
-                          flex: 1,
+                          gap: '8px',
+                          color: '#6b7280',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          transition: 'color 0.2s ease',
+                          fontSize: '14px',
+                          fontWeight: '600'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = '#dc2626';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = '#6b7280';
+                        }}
+                      >
+                        <span style={{ fontSize: '18px' }}>❤️</span>
+                        <span>{post.likes}</span>
+                      </button>
+                      <button 
+                        onClick={() => toggleComments(post.id)}
+                        style={{
                           display: 'flex',
-                          gap: '8px'
+                          alignItems: 'center',
+                          gap: '8px',
+                          color: '#6b7280',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          transition: 'color 0.2s ease',
+                          fontSize: '14px',
+                          fontWeight: '600'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = '#2563eb';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = '#6b7280';
+                        }}
+                      >
+                        <span style={{ fontSize: '18px' }}>💬</span>
+                        <span>{post.comments.length}</span>
+                      </button>
+                      <button style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        color: '#6b7280',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        transition: 'color 0.2s ease',
+                        fontSize: '14px',
+                        fontWeight: '600'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = '#059669';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = '#6b7280';
+                      }}
+                      >
+                        <span style={{ fontSize: '18px' }}>📤</span>
+                        <span>공유</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 댓글 섹션 */}
+                  {post.showComments && (
+                    <div style={{
+                      borderTop: '1px solid #f3f4f6',
+                      background: '#f9fafb'
+                    }}>
+                      
+                      {/* 기존 댓글 */}
+                      {post.comments.length > 0 && (
+                        <div style={{
+                          padding: '16px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '12px'
                         }}>
-                          <input
-                            type="text"
-                            placeholder="댓글을 입력하세요..."
-                            value={commentInputs[post.id] || ''}
-                            onChange={(e) => setCommentInputs({ ...commentInputs, [post.id]: e.target.value })}
-                            onKeyPress={(e) => e.key === 'Enter' && addComment(post.id)}
-                            style={{
-                              flex: 1,
-                              padding: '8px 12px',
-                              background: 'white',
-                              border: '1px solid #d1d5db',
-                              borderRadius: '12px',
-                              fontSize: '14px',
-                              outline: 'none',
-                              transition: 'all 0.2s ease'
-                            }}
-                            onFocus={(e) => {
-                              e.currentTarget.style.borderColor = '#6b7280';
-                              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(107, 114, 128, 0.1)';
-                            }}
-                            onBlur={(e) => {
-                              e.currentTarget.style.borderColor = '#d1d5db';
-                              e.currentTarget.style.boxShadow = 'none';
-                            }}
-                          />
-                          <button
-                            onClick={() => addComment(post.id)}
-                            style={{
-                              padding: '8px 16px',
-                              background: '#1f2937',
-                              color: 'white',
-                              borderRadius: '12px',
-                              fontSize: '14px',
-                              fontWeight: '600',
-                              border: 'none',
-                              cursor: 'pointer',
-                              transition: 'all 0.2s ease'
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.background = '#111827';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.background = '#1f2937';
-                            }}
-                          >
-                            게시
-                          </button>
+                          {post.comments.map(comment => (
+                            <div key={comment.id} style={{
+                              display: 'flex',
+                              gap: '12px'
+                            }}>
+                              <div style={{
+                                width: '32px',
+                                height: '32px',
+                                background: 'linear-gradient(135deg, #6b7280, #4b5563)',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'white',
+                                fontWeight: 'bold',
+                                fontSize: '14px'
+                              }}>
+                                {comment.author[0]}
+                              </div>
+                              <div style={{ flex: 1 }}>
+                                <div style={{
+                                  background: 'white',
+                                  borderRadius: '12px',
+                                  padding: '12px'
+                                }}>
+                                  <h4 style={{
+                                    fontWeight: '600',
+                                    fontSize: '14px',
+                                    color: '#1f2937',
+                                    margin: '0 0 4px 0'
+                                  }}>{comment.author}</h4>
+                                  <p style={{
+                                    fontSize: '14px',
+                                    color: '#374151',
+                                    margin: 0
+                                  }}>{comment.content}</p>
+                                </div>
+                                <p style={{
+                                  fontSize: '12px',
+                                  color: '#6b7280',
+                                  margin: '4px 0 0 12px'
+                                }}>{comment.time}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* 댓글 입력 */}
+                      <div style={{
+                        padding: '16px',
+                        borderTop: '1px solid #e5e7eb'
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          gap: '12px'
+                        }}>
+                          <div style={{
+                            width: '32px',
+                            height: '32px',
+                            background: 'linear-gradient(135deg, #1f2937, #4b5563)',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontWeight: 'bold',
+                            fontSize: '14px'
+                          }}>
+                            나
+                          </div>
+                          <div style={{
+                            flex: 1,
+                            display: 'flex',
+                            gap: '8px'
+                          }}>
+                            <input
+                              type="text"
+                              placeholder="댓글을 입력하세요..."
+                              value={commentInputs[post.id] || ''}
+                              onChange={(e) => setCommentInputs({ ...commentInputs, [post.id]: e.target.value })}
+                              onKeyPress={(e) => e.key === 'Enter' && addComment(post.id)}
+                              style={{
+                                flex: 1,
+                                padding: '8px 12px',
+                                background: 'white',
+                                border: '1px solid #d1d5db',
+                                borderRadius: '12px',
+                                fontSize: '14px',
+                                outline: 'none',
+                                transition: 'all 0.2s ease'
+                              }}
+                              onFocus={(e) => {
+                                e.currentTarget.style.borderColor = '#6b7280';
+                                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(107, 114, 128, 0.1)';
+                              }}
+                              onBlur={(e) => {
+                                e.currentTarget.style.borderColor = '#d1d5db';
+                                e.currentTarget.style.boxShadow = 'none';
+                              }}
+                            />
+                            <button
+                              onClick={() => addComment(post.id)}
+                              style={{
+                                padding: '8px 16px',
+                                background: '#1f2937',
+                                color: 'white',
+                                borderRadius: '12px',
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                border: 'none',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = '#111827';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = '#1f2937';
+                              }}
+                            >
+                              게시
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            ))
-          ) : (
-            <div style={{
-              textAlign: 'center',
-              padding: '64px 0'
-            }}>
-              <div style={{ fontSize: '4rem', marginBottom: '16px' }}>📝</div>
-              <h3 style={{
-                fontSize: '1.25rem',
-                fontWeight: '600',
-                color: '#6b7280',
-                marginBottom: '8px'
+                  )}
+                </div>
+              ))
+            ) : (
+              <div style={{
+                textAlign: 'center',
+                padding: '64px 0'
               }}>
-                {selectedCategory} 카테고리에 게시물이 없어요
-              </h3>
-              <p style={{
-                color: '#9ca3af',
-                marginBottom: '24px'
-              }}>첫 번째 게시물을 작성해보세요!</p>
-              <button
-                onClick={() => setShowWriteModal(true)}
-                style={{
-                  padding: '12px 24px',
-                  background: '#1f2937',
-                  color: 'white',
-                  borderRadius: '16px',
+                <div style={{ fontSize: '4rem', marginBottom: '16px' }}>📝</div>
+                <h3 style={{
+                  fontSize: '1.25rem',
                   fontWeight: '600',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  boxShadow: '0 4px 15px rgba(31, 41, 55, 0.3)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#111827';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 8px 25px rgba(31, 41, 55, 0.4)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#1f2937';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(31, 41, 55, 0.3)';
-                }}
-              >
-                + 게시물 작성하기
-              </button>
-            </div>
-          )}
-        </div>
+                  color: '#6b7280',
+                  marginBottom: '8px'
+                }}>
+                  {selectedCategory} 카테고리에 게시물이 없어요
+                </h3>
+                <p style={{
+                  color: '#9ca3af',
+                  marginBottom: '24px'
+                }}>첫 번째 게시물을 작성해보세요!</p>
+                <button
+                  onClick={() => setShowWriteModal(true)}
+                  style={{
+                    padding: '12px 24px',
+                    background: '#1f2937',
+                    color: 'white',
+                    borderRadius: '16px',
+                    fontWeight: '600',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 4px 15px rgba(31, 41, 55, 0.3)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#111827';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(31, 41, 55, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#1f2937';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(31, 41, 55, 0.3)';
+                  }}
+                >
+                  + 게시물 작성하기
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 게시물 작성 모달 */}
@@ -734,7 +786,11 @@ export default function ExplorePage() {
                   새 게시물 작성
                 </h3>
                 <button 
-                  onClick={() => setShowWriteModal(false)}
+                  onClick={() => {
+                    setShowWriteModal(false);
+                    setNewPost('');
+                    setSelectedImage(null);
+                  }}
                   style={{
                     fontSize: '1.5rem',
                     color: '#6b7280',
@@ -744,7 +800,7 @@ export default function ExplorePage() {
                     transition: 'color 0.2s ease'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.color = '#374151';
+                    e.currentTarget.style.color = '#1f2937';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.color = '#6b7280';
@@ -754,97 +810,151 @@ export default function ExplorePage() {
                 </button>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#374151',
-                    marginBottom: '8px'
-                  }}>내용</label>
-                  <textarea
-                    placeholder={`${selectedCategory}에 대한 이야기를 들려주세요...`}
-                    value={newPost}
-                    onChange={(e) => setNewPost(e.target.value)}
-                    style={{
-                      width: '100%',
-                      height: '128px',
-                      padding: '16px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '16px',
-                      resize: 'none',
-                      fontSize: '14px',
-                      outline: 'none',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = '#6b7280';
-                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(107, 114, 128, 0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = '#d1d5db';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
-                  />
-                </div>
+              {/* 카테고리 표시 */}
+              <div style={{
+                padding: '8px 16px',
+                background: '#f3f4f6',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#6b7280',
+                marginBottom: '16px',
+                textAlign: 'center'
+              }}>
+                {selectedCategory} 카테고리
+              </div>
 
-                <div style={{
-                  display: 'flex',
-                  gap: '12px',
-                  paddingTop: '16px'
+              {/* 게시물 내용 입력 */}
+              <textarea
+                placeholder="실패 경험을 공유해주세요..."
+                value={newPost}
+                onChange={(e) => setNewPost(e.target.value)}
+                style={{
+                  width: '100%',
+                  height: '120px',
+                  padding: '16px',
+                  background: '#f9fafb',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '12px',
+                  resize: 'none',
+                  fontSize: '14px',
+                  outline: 'none',
+                  transition: 'all 0.2s ease',
+                  marginBottom: '16px'
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#6b7280';
+                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(107, 114, 128, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#e5e7eb';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              />
+
+              {/* 이미지 업로드 */}
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{
+                  display: 'block',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  marginBottom: '8px'
                 }}>
-                  <button
-                    onClick={() => setShowWriteModal(false)}
-                    style={{
-                      flex: 1,
-                      padding: '12px',
-                      background: '#f3f4f6',
-                      color: '#374151',
-                      borderRadius: '16px',
-                      fontWeight: '600',
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'background 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#e5e7eb';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#f3f4f6';
-                    }}
-                  >
-                    취소
-                  </button>
-                  <button
-                    onClick={addPost}
-                    style={{
-                      flex: 1,
-                      padding: '12px',
-                      background: '#1f2937',
-                      color: 'white',
-                      borderRadius: '16px',
-                      fontWeight: '600',
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
+                  이미지 첨부 (선택사항)
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    background: '#f9fafb',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    fontSize: '14px'
+                  }}
+                />
+                {selectedImage && (
+                  <div style={{
+                    marginTop: '8px',
+                    padding: '8px',
+                    background: '#f0f9ff',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    color: '#0369a1'
+                  }}>
+                    선택된 파일: {selectedImage.name}
+                  </div>
+                )}
+              </div>
+
+              {/* 버튼 */}
+              <div style={{
+                display: 'flex',
+                gap: '12px'
+              }}>
+                <button
+                  onClick={() => {
+                    setShowWriteModal(false);
+                    setNewPost('');
+                    setSelectedImage(null);
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    background: '#f3f4f6',
+                    color: '#6b7280',
+                    borderRadius: '12px',
+                    fontWeight: '600',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#e5e7eb';
+                    e.currentTarget.style.color = '#374151';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#f3f4f6';
+                    e.currentTarget.style.color = '#6b7280';
+                  }}
+                >
+                  취소
+                </button>
+                <button
+                  onClick={addPost}
+                  disabled={!newPost.trim() || loading}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    background: (!newPost.trim() || loading) ? '#9ca3af' : '#1f2937',
+                    color: 'white',
+                    borderRadius: '12px',
+                    fontWeight: '600',
+                    border: 'none',
+                    cursor: (!newPost.trim() || loading) ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (newPost.trim() && !loading) {
                       e.currentTarget.style.background = '#111827';
-                    }}
-                    onMouseLeave={(e) => {
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (newPost.trim() && !loading) {
                       e.currentTarget.style.background = '#1f2937';
-                    }}
-                  >
-                    게시하기
-                  </button>
-                </div>
+                    }
+                  }}
+                >
+                  {loading ? '게시 중...' : '게시하기'}
+                </button>
               </div>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }
