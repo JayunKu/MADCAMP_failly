@@ -17,6 +17,7 @@ export class FailpostsService {
     const user = await this.prisma.user.findUnique({
       where: { id: user_id },
     });
+    console.log('create_fail_post의 유저 id : ', user_id);
     if (!user) {
       throw new NotFoundException('user not found');
     }

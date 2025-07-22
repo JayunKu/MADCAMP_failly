@@ -44,6 +44,8 @@ export class AuthService {
       throw new UnauthorizedException('invalid email or password');
     }
 
+    console.log('login 성공 : ', email);
+
     return {
       message: 'success',
       user_id: user.id,

@@ -2,9 +2,6 @@
 import { Storage } from '@google-cloud/storage';
 import { v4 as uuidv4 } from 'uuid';
 
-const storage = new Storage(); // 환경변수로 인증 자동 처리
-const bucketName = process.env.GOOGLE_CLOUD_BUCKET!;
-
 /**
  * Google Cloud Storage에 파일을 업로드하고, public URL을 반환합니다.
  * @param fileBuffer 업로드할 파일의 버퍼
@@ -17,6 +14,10 @@ export async function uploadToGCS(
   folder: string,
   mimetype: string,
 ): Promise<string> {
+  const storage = new Storage(); // 환경변수로 인증 자동 처리
+  const bucketName = process.env.GOOGLE_CLOUD_BUCKET!;
+  console.log('GCS Bucket Name:', bucketName); // 디버그용
+
   const filename = `${folder}/${uuidv4()}`;
   const bucket = storage.bucket(bucketName);
   const file = bucket.file(filename);
