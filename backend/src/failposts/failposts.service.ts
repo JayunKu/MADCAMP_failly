@@ -156,11 +156,13 @@ export class FailpostsService {
   }
 
   async addFailpostReaction(id: string, addReactionDto: any) {
-    const { reaction_type } = addReactionDto;
+    const { reaction_type, delta } = addReactionDto;
 
     const failpost = await this.prisma.failPost.findUnique({
       where: { id },
     });
+
+    console.log('add reaction: ', reaction_type);
 
     if (!failpost) {
       throw new NotFoundException('failpost not found');
@@ -171,6 +173,7 @@ export class FailpostsService {
     });
 
     if (!reaction) {
+      console.log('invalid reaction type')
       throw new BadRequestException('invalid reaction type');
     }
 
@@ -192,6 +195,8 @@ export class FailpostsService {
         count: 1,
       },
     });
+
+    console.log('add reaction 성공');
 
     return { message: 'success' };
   }

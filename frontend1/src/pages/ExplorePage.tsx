@@ -117,7 +117,7 @@ export default function ExplorePage() {
       }));
       
       // 실제 API 호출 (반응 추가)
-      // await addFailpostReaction(postId, reactionType);
+      await addFailpostReaction(postId, reactionType, 1);
     } catch (err) {
       console.error('Failed to toggle reaction:', err);
     }

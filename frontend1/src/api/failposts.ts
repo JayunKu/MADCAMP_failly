@@ -91,9 +91,10 @@ const addReactionResponseSchema = z.object({
  * @param payload - 추가할 반응의 종류를 포함하는 객체
  * @returns 성공 시 "success" 메시지
  */
-export const addFailpostReaction = async (failpostId: string, reactionType: string) => {
+export const addFailpostReaction = async (failpostId: string, reactionType: string, delta: number) => {
   try {
-    const payload = { reaction_type: reactionType };
+    const payload = { reaction_type: reactionType, delta: delta, };
+    console.log('add_failpost_reaction call : ', reactionType);
     const response = await apiClient.post(`/failposts/${failpostId}/reactions`, payload);
 
     const validatedResponse = addReactionResponseSchema.parse(response.data);
