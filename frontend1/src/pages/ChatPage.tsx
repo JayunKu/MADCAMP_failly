@@ -1,606 +1,546 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-interface Message {
+interface ChatRoom {
   id: number;
-  sender: string;
-  message: string;
-  time: string;
-  isMe: boolean;
-  avatar?: string;
+  name: string;
+  lastMessage: string;
+  lastTime: string;
+  unreadCount: number;
+  avatar: string;
+  isActive: boolean;
+  timeLeft: number; // 남은 시간 (초 단위)
+  category: string;
 }
 
 export default function ChatPage() {
   const navigate = useNavigate();
-  const [newMessage, setNewMessage] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [messages, setMessages] = useState<Message[]>([
-    { 
-      id: 1, 
-      sender: '냥이친구', 
-      message: '안녕하세요! 🐱', 
-      time: '오후 3:20', 
-      isMe: false,
-      avatar: '🐱'
+  const [chatRooms, setChatRooms] = useState<ChatRoom[]>([
+    {
+      id: 1,
+      name: "지각 실패 모임",
+      lastMessage: "오늘도 또 늦었어요 ㅠㅠ",
+      lastTime: "방금 전",
+      unreadCount: 3,
+      avatar: "⏰",
+      isActive: true,
+      timeLeft: 86400, // 24시간
+      category: "지각"
     },
-    { 
-      id: 2, 
-      sender: '나', 
-      message: '안녕! 잘 지내?', 
-      time: '오후 3:21', 
-      isMe: true
+    {
+      id: 2,
+      name: "다이어트 포기 클럽",
+      lastMessage: "치킨 먹고 싶다...",
+      lastTime: "5분 전",
+      unreadCount: 7,
+      avatar: "🍗",
+      isActive: true,
+      timeLeft: 82800, // 23시간
+      category: "다이어트"
     },
-    { 
-      id: 3, 
-      sender: '냥이친구', 
-      message: '오늘 날씨 정말 좋다냥~ ☀️', 
-      time: '오후 3:22', 
-      isMe: false,
-      avatar: '🐱'
+    {
+      id: 3,
+      name: "시험 망한 사람들",
+      lastMessage: "다음엔 잘할 수 있을 거야!",
+      lastTime: "12분 전",
+      unreadCount: 0,
+      avatar: "📚",
+      isActive: true,
+      timeLeft: 75600, // 21시간
+      category: "시험"
     },
-    { 
-      id: 4, 
-      sender: '냥이친구', 
-      message: '같이 놀자냥! 🐾✨', 
-      time: '오후 3:24', 
-      isMe: false,
-      avatar: '🐱'
+    {
+      id: 4,
+      name: "미룸의 달인들",
+      lastMessage: "내일부터 진짜 할게요...",
+      lastTime: "1시간 전",
+      unreadCount: 12,
+      avatar: "📅",
+      isActive: true,
+      timeLeft: 43200, // 12시간
+      category: "미룸"
     },
-    { 
-      id: 5, 
-      sender: '나', 
-      message: '좋아! 어디서 만날까?', 
-      time: '오후 3:25', 
-      isMe: true
+    {
+      id: 5,
+      name: "소개팅 실패담",
+      lastMessage: "다음엔 더 잘할 수 있을 거예요",
+      lastTime: "3시간 전",
+      unreadCount: 0,
+      avatar: "💔",
+      isActive: true,
+      timeLeft: 21600, // 6시간
+      category: "소개팅"
     },
-    { 
-      id: 6, 
-      sender: '냥이친구', 
-      message: '공원에서 만나자냥! 🌳', 
-      time: '오후 3:26', 
-      isMe: false,
-      avatar: '🐱'
-    },
+    {
+      id: 6,
+      name: "늦잠 자는 사람들",
+      lastMessage: "알람을 10개 맞춰도...",
+      lastTime: "5시간 전",
+      unreadCount: 2,
+      avatar: "😴",
+      isActive: true,
+      timeLeft: 7200, // 2시간
+      category: "늦잠"
+    }
   ]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  // 시간 포맷 함수
+  const formatTimeLeft = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    
+    if (hours > 0) {
+      return `${hours}시간 ${minutes}분`;
+    } else if (minutes > 0) {
+      return `${minutes}분`;
+    } else {
+      return `${seconds}초`;
+    }
   };
 
+  // 타이머 업데이트
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    const timer = setInterval(() => {
+      setChatRooms(prev => 
+        prev.map(room => ({
+          ...room,
+          timeLeft: Math.max(0, room.timeLeft - 1),
+          isActive: room.timeLeft > 1
+        })).filter(room => room.timeLeft > 0) // 시간이 다 된 방은 제거
+      );
+    }, 1000);
 
-  const sendMessage = () => {
-    if (newMessage.trim()) {
-      const now = new Date();
-      const currentTime = now.getHours() > 12 
-        ? `오후 ${now.getHours() - 12}:${now.getMinutes().toString().padStart(2, '0')}` 
-        : `오전 ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
-      
-      const newMsg: Message = {
-        id: Date.now(),
-        sender: '나',
-        message: newMessage,
-        time: currentTime,
-        isMe: true
-      };
+    return () => clearInterval(timer);
+  }, []);
 
-      setMessages(prev => [...prev, newMsg]);
-      setNewMessage('');
-    }
+  // 진행률 계산 (24시간 기준)
+  const getProgressPercentage = (timeLeft: number) => {
+    return (timeLeft / 86400) * 100;
+  };
+
+  // 진행률에 따른 색상
+  const getProgressColor = (percentage: number) => {
+    if (percentage > 50) return '#22c55e'; // 초록
+    if (percentage > 25) return '#f59e0b'; // 주황
+    return '#ef4444'; // 빨강
   };
 
   return (
     <div style={{
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #f8fafc, #f1f5f9, #e2e8f0)',
-      fontFamily: 'system-ui, -apple-system, sans-serif',
-      position: 'relative',
-      overflow: 'hidden',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '20px'
+      fontFamily: 'system-ui, -apple-system, sans-serif'
     }}>
       
-      {/* 배경 장식 요소들 */}
+      {/* 상단 헤더 */}
       <div style={{
-        position: 'absolute',
-        inset: 0,
-        overflow: 'hidden',
-        pointerEvents: 'none'
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        background: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid #e5e7eb',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
       }}>
         <div style={{
-          position: 'absolute',
-          top: '80px',
-          left: '40px',
-          width: '120px',
-          height: '120px',
-          background: 'linear-gradient(135deg, #e2e8f0, #cbd5e1)',
-          borderRadius: '50%',
-          opacity: 0.3,
-          animation: 'pulse 2s infinite'
-        }}></div>
-        <div style={{
-          position: 'absolute',
-          bottom: '80px',
-          right: '80px',
-          width: '90px',
-          height: '90px',
-          background: 'linear-gradient(135deg, #d1d5db, #9ca3af)',
-          borderRadius: '50%',
-          opacity: 0.4
-        }}></div>
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '80px',
-          width: '60px',
-          height: '60px',
-          background: 'linear-gradient(135deg, #f3f4f6, #e5e7eb)',
-          borderRadius: '50%',
-          opacity: 0.35
-        }}></div>
-      </div>
-
-      {/* 핸드폰 프레임 */}
-      <div style={{
-        width: '380px',
-        height: '700px',
-        background: 'linear-gradient(145deg, #1f2937, #374151)',
-        borderRadius: '40px',
-        padding: '8px',
-        boxShadow: '0 25px 50px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
-        position: 'relative',
-        zIndex: 10
-      }}>
-        
-        {/* 핸드폰 노치 */}
-        <div style={{
-          position: 'absolute',
-          top: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '120px',
-          height: '25px',
-          background: '#111827',
-          borderRadius: '15px',
-          zIndex: 20
-        }}></div>
-
-        {/* 핸드폰 스크린 */}
-        <div style={{
-          width: '100%',
-          height: '100%',
-          background: 'white',
-          borderRadius: '32px',
-          overflow: 'hidden',
+          maxWidth: '1024px',
+          margin: '0 auto',
+          padding: '16px',
           display: 'flex',
-          flexDirection: 'column',
-          position: 'relative'
+          alignItems: 'center',
+          justifyContent: 'space-between'
         }}>
-          
-          {/* 상태바 */}
-          <div style={{
-            height: '44px',
-            background: 'transparent',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0 20px',
-            paddingTop: '8px',
-            fontSize: '14px',
-            fontWeight: '600',
-            color: '#1f2937'
-          }}>
-            <span>9:41</span>
-            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-              <div style={{ width: '18px', height: '10px', border: '1px solid #1f2937', borderRadius: '2px', position: 'relative' }}>
-                <div style={{ width: '70%', height: '100%', background: '#1f2937', borderRadius: '1px' }}></div>
-              </div>
-              <span style={{ fontSize: '12px' }}>📶</span>
-              <span style={{ fontSize: '12px' }}>📶</span>
-            </div>
-          </div>
-
-          {/* 채팅 헤더 */}
-          <div style={{
-            background: 'linear-gradient(135deg, #1f2937, #4b5563)',
-            padding: '16px 20px',
-            borderBottom: '1px solid #e5e7eb',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <button 
-                onClick={() => navigate(-1)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '32px',
-                  height: '32px',
-                  background: 'rgba(255,255,255,0.2)',
-                  borderRadius: '50%',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '16px',
-                  color: 'white',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
-                }}
-              >
-                ←
-              </button>
-              <div style={{
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button 
+              onClick={() => navigate(-1)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 width: '40px',
                 height: '40px',
-                background: 'linear-gradient(135deg, #f59e0b, #f97316)',
+                background: '#f3f4f6',
                 borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '20px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '18px',
+                color: '#6b7280',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#e5e7eb';
+                e.currentTarget.style.color = '#1f2937';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#f3f4f6';
+                e.currentTarget.style.color = '#6b7280';
+              }}
+            >
+              ←
+            </button>
+            <div>
+              <h1 style={{
+                fontSize: '1.5rem',
+                fontWeight: 'bold',
+                background: 'linear-gradient(135deg, #1f2937, #4b5563, #6b7280)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                margin: 0
               }}>
-                🐱
-              </div>
-              <div>
-                <h3 style={{
-                  color: 'white',
-                  fontWeight: 'bold',
-                  fontSize: '16px',
-                  margin: 0
-                }}>냥이친구</h3>
-                <p style={{
-                  color: 'rgba(255,255,255,0.8)',
-                  fontSize: '12px',
-                  margin: 0
-                }}>온라인</p>
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button style={{
-                width: '32px',
-                height: '32px',
-                background: 'rgba(255,255,255,0.2)',
-                borderRadius: '50%',
-                border: 'none',
-                cursor: 'pointer',
+                채팅방 목록
+              </h1>
+              <p style={{
                 fontSize: '14px',
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'background 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.3)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
-              }}
-              >📞</button>
-              <button style={{
-                width: '32px',
-                height: '32px',
-                background: 'rgba(255,255,255,0.2)',
-                borderRadius: '50%',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '14px',
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'background 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.3)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
-              }}
-              >⚙️</button>
+                color: '#6b7280',
+                margin: 0
+              }}>
+                24시간 후 자동으로 사라지는 채팅방
+              </p>
             </div>
           </div>
-
-          {/* 메시지 영역 */}
+          
           <div style={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: '16px',
-            background: 'linear-gradient(to bottom, #f9fafb, #f3f4f6)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '12px'
-          }}>
-            {messages.map((message, index) => {
-              const showAvatar = !message.isMe && (index === 0 || messages[index - 1].isMe || messages[index - 1].sender !== message.sender);
-              const showTime = index === messages.length - 1 || 
-                              messages[index + 1].isMe !== message.isMe || 
-                              messages[index + 1].sender !== message.sender;
-              
-              return (
-                <div key={message.id} style={{
-                  display: 'flex',
-                  justifyContent: message.isMe ? 'flex-end' : 'flex-start',
-                  alignItems: 'flex-end',
-                  gap: '8px'
-                }}>
-                  
-                  {/* 상대방 아바타 */}
-                  {!message.isMe && (
-                    <div style={{ width: '28px', height: '28px', flexShrink: 0 }}>
-                      {showAvatar && (
-                        <div style={{
-                          width: '28px',
-                          height: '28px',
-                          background: 'linear-gradient(135deg, #f59e0b, #f97316)',
-                          borderRadius: '50%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '14px',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-                        }}>
-                          {message.avatar || '🐱'}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: message.isMe ? 'flex-end' : 'flex-start',
-                    maxWidth: '240px'
-                  }}>
-                    
-                    {/* 발신자 이름 (상대방만) */}
-                    {!message.isMe && showAvatar && (
-                      <span style={{
-                        fontSize: '11px',
-                        color: '#6b7280',
-                        marginBottom: '4px',
-                        marginLeft: '8px',
-                        fontWeight: '500'
-                      }}>{message.sender}</span>
-                    )}
-                    
-                    {/* 메시지 버블 */}
-                    <div style={{
-                      position: 'relative',
-                      padding: '12px 16px',
-                      borderRadius: '18px',
-                      fontSize: '14px',
-                      lineHeight: '1.4',
-                      wordBreak: 'break-word',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                      background: message.isMe 
-                        ? 'linear-gradient(135deg, #1f2937, #374151)' 
-                        : 'white',
-                      color: message.isMe ? 'white' : '#1f2937',
-                      border: message.isMe ? 'none' : '1px solid #e5e7eb',
-                      borderBottomRightRadius: message.isMe ? '6px' : '18px',
-                      borderBottomLeftRadius: message.isMe ? '18px' : '6px'
-                    }}>
-                      {message.message}
-                    </div>
-                    
-                    {/* 시간 표시 */}
-                    {showTime && (
-                      <span style={{
-                        fontSize: '10px',
-                        color: '#9ca3af',
-                        marginTop: '4px',
-                        marginLeft: message.isMe ? '0' : '8px',
-                        marginRight: message.isMe ? '8px' : '0'
-                      }}>
-                        {message.time}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* 내 아바타 공간 (균형을 위해) */}
-                  {message.isMe && <div style={{ width: '28px', height: '28px', flexShrink: 0 }}></div>}
-                </div>
-              );
-            })}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* 메시지 입력 영역 */}
-          <div style={{
-            padding: '16px',
-            background: 'white',
-            borderTop: '1px solid #e5e7eb'
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'flex-end',
-              gap: '8px'
-            }}>
-              <button style={{
-                width: '36px',
-                height: '36px',
-                background: '#f3f4f6',
-                borderRadius: '50%',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '16px',
-                color: '#6b7280',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'background 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#e5e7eb';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#f3f4f6';
-              }}
-              >📎</button>
-              
-              <div style={{ flex: 1, position: 'relative' }}>
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                  placeholder="메시지를 입력하세요..."
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    background: '#f9fafb',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '20px',
-                    fontSize: '14px',
-                    outline: 'none',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = '#6b7280';
-                    e.currentTarget.style.background = 'white';
-                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(107, 114, 128, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = '#d1d5db';
-                    e.currentTarget.style.background = '#f9fafb';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
-                />
-              </div>
-              
-              <button style={{
-                width: '36px',
-                height: '36px',
-                background: '#f3f4f6',
-                borderRadius: '50%',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '16px',
-                color: '#6b7280',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'background 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#e5e7eb';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#f3f4f6';
-              }}
-              >😊</button>
-              
-              <button
-                onClick={sendMessage}
-                disabled={!newMessage.trim()}
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  border: 'none',
-                  cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
-                  fontSize: '16px',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.2s ease',
-                  background: newMessage.trim() 
-                    ? 'linear-gradient(135deg, #1f2937, #374151)' 
-                    : '#9ca3af',
-                  boxShadow: newMessage.trim() ? '0 4px 12px rgba(31, 41, 55, 0.3)' : 'none'
-                }}
-                onMouseEnter={(e) => {
-                  if (newMessage.trim()) {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, #111827, #1f2937)';
-                    e.currentTarget.style.transform = 'scale(1.05)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (newMessage.trim()) {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, #1f2937, #374151)';
-                    e.currentTarget.style.transform = 'scale(1)';
-                  }
-                }}
-              >
-                ➤
-              </button>
-            </div>
-          </div>
-
-          {/* 홈 인디케이터 */}
-          <div style={{
-            height: '20px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            gap: '8px',
+            background: '#f3f4f6',
+            borderRadius: '12px',
+            padding: '8px 12px'
           }}>
             <div style={{
-              width: '120px',
-              height: '4px',
-              background: '#d1d5db',
-              borderRadius: '2px'
+              width: '8px',
+              height: '8px',
+              background: '#22c55e',
+              borderRadius: '50%',
+              animation: 'pulse 2s infinite'
             }}></div>
+            <span style={{
+              fontSize: '12px',
+              fontWeight: '600',
+              color: '#374151'
+            }}>
+              {chatRooms.length}개 활성 채팅방
+            </span>
           </div>
         </div>
       </div>
 
-      {/* 고양이 GIF 장식 */}
+      {/* 채팅방 목록 */}
       <div style={{
-        position: 'absolute',
-        bottom: '40px',
-        right: '40px',
-        zIndex: 5
+        maxWidth: '800px',
+        margin: '0 auto',
+        padding: '24px 16px'
       }}>
-        <img 
-          src="/assets/cat.gif" 
-          alt="Cat" 
-          style={{
-            width: '80px',
-            height: '80px',
-            borderRadius: '50%',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
-            border: '3px solid rgba(255,255,255,0.8)',
-            objectFit: 'cover',
-            opacity: 0.8
-          }}
-        />
+        {chatRooms.length > 0 ? (
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px'
+          }}>
+            {chatRooms.map(room => {
+              const progressPercentage = getProgressPercentage(room.timeLeft);
+              const progressColor = getProgressColor(progressPercentage);
+              
+              return (
+                <div
+                  key={room.id}
+                  style={{
+                    background: 'white',
+                    borderRadius: '20px',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+                    border: '1px solid #f1f5f9',
+                    overflow: 'hidden',
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer',
+                    position: 'relative'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '0 20px 60px rgba(0,0,0,0.12)';
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.borderColor = '#e2e8f0';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.08)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.borderColor = '#f1f5f9';
+                  }}
+                  onClick={() => {
+                    // 개별 채팅방으로 이동하는 로직 (나중에 구현)
+                    console.log(`채팅방 ${room.name} 입장`);
+                  }}
+                >
+                  {/* 시간 진행률 바 */}
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    height: '4px',
+                    width: `${progressPercentage}%`,
+                    background: `linear-gradient(90deg, ${progressColor}, ${progressColor}dd)`,
+                    transition: 'all 1s ease',
+                    borderRadius: '0 0 4px 0'
+                  }}></div>
+
+                  <div style={{
+                    padding: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px'
+                  }}>
+                    {/* 아바타 */}
+                    <div style={{
+                      width: '60px',
+                      height: '60px',
+                      background: 'linear-gradient(135deg, #f3f4f6, #e5e7eb)',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '24px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      position: 'relative'
+                    }}>
+                      {room.avatar}
+                      {room.isActive && (
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '2px',
+                          right: '2px',
+                          width: '16px',
+                          height: '16px',
+                          background: '#22c55e',
+                          borderRadius: '50%',
+                          border: '2px solid white',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                        }}></div>
+                      )}
+                    </div>
+
+                    {/* 채팅방 정보 */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginBottom: '4px'
+                      }}>
+                        <h3 style={{
+                          fontSize: '18px',
+                          fontWeight: '700',
+                          color: '#1f2937',
+                          margin: 0,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {room.name}
+                        </h3>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}>
+                          {room.unreadCount > 0 && (
+                            <div style={{
+                              background: '#ef4444',
+                              color: 'white',
+                              borderRadius: '12px',
+                              padding: '2px 8px',
+                              fontSize: '12px',
+                              fontWeight: '700',
+                              minWidth: '20px',
+                              textAlign: 'center'
+                            }}>
+                              {room.unreadCount > 99 ? '99+' : room.unreadCount}
+                            </div>
+                          )}
+                          <span style={{
+                            fontSize: '12px',
+                            color: '#9ca3af',
+                            fontWeight: '500'
+                          }}>
+                            {room.lastTime}
+                          </span>
+                        </div>
+                      </div>
+
+                      <p style={{
+                        fontSize: '14px',
+                        color: '#6b7280',
+                        margin: '0 0 8px 0',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {room.lastMessage}
+                      </p>
+
+                      {/* 카테고리와 남은 시간 */}
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
+                      }}>
+                        <div style={{
+                          display: 'inline-block',
+                          background: '#f3f4f6',
+                          color: '#6b7280',
+                          borderRadius: '8px',
+                          padding: '4px 8px',
+                          fontSize: '11px',
+                          fontWeight: '600'
+                        }}>
+                          #{room.category}
+                        </div>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}>
+                          <div style={{
+                            width: '6px',
+                            height: '6px',
+                            background: progressColor,
+                            borderRadius: '50%',
+                            animation: progressPercentage < 25 ? 'pulse 1s infinite' : 'none'
+                          }}></div>
+                          <span style={{
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            color: progressColor
+                          }}>
+                            {formatTimeLeft(room.timeLeft)} 남음
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          /* 빈 상태 */
+          <div style={{
+            textAlign: 'center',
+            padding: '80px 0'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginBottom: '32px'
+            }}>
+              <div style={{
+                width: '120px',
+                height: '120px',
+                background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '3px solid #e2e8f0',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
+                fontSize: '48px'
+              }}>
+                💬
+              </div>
+            </div>
+            
+            <h3 style={{
+              fontSize: '1.5rem',
+              fontWeight: '600',
+              color: '#374151',
+              marginBottom: '12px',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif'
+            }}>
+              활성 채팅방이 없습니다
+            </h3>
+            <p style={{
+              fontSize: '16px',
+              color: '#9ca3af',
+              marginBottom: '32px',
+              fontWeight: '500'
+            }}>
+              실패 게시물을 작성하면 자동으로 채팅방이 생성됩니다
+            </p>
+            <button
+              onClick={() => navigate('/explore')}
+              style={{
+                padding: '12px 24px',
+                background: '#1f2937',
+                color: 'white',
+                borderRadius: '16px',
+                fontWeight: '600',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 15px rgba(31, 41, 55, 0.3)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#111827';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 8px 25px rgba(31, 41, 55, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#1f2937';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 15px rgba(31, 41, 55, 0.3)';
+              }}
+            >
+              탐색 페이지로 이동
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* 하단 브랜딩 */}
+      {/* 하단 설명 */}
       <div style={{
-        position: 'absolute',
-        bottom: '20px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        textAlign: 'center',
-        zIndex: 10
+        maxWidth: '800px',
+        margin: '0 auto',
+        padding: '0 16px 40px',
+        textAlign: 'center'
       }}>
-        <p style={{ 
-          fontSize: '14px', 
-          color: '#9ca3af', 
-          fontWeight: '500',
-          margin: 0
-        }}>failly 채팅</p>
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(10px)',
+          borderRadius: '16px',
+          padding: '20px',
+          border: '1px solid rgba(255, 255, 255, 0.6)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
+        }}>
+          <h4 style={{
+            fontSize: '16px',
+            fontWeight: '600',
+            color: '#374151',
+            margin: '0 0 8px 0'
+          }}>
+            💡 채팅방 안내
+          </h4>
+          <p style={{
+            fontSize: '14px',
+            color: '#6b7280',
+            margin: 0,
+            lineHeight: '1.5'
+          }}>
+            각 채팅방은 생성 후 24시간 동안만 유지됩니다. 시간이 지나면 자동으로 사라져요!<br/>
+            같은 실패를 경험한 사람들과 서로 위로하고 격려해보세요. 🤗
+          </p>
+        </div>
       </div>
 
       {/* CSS 애니메이션 */}
       <style>{`
         @keyframes pulse {
-          0%, 100% { opacity: 0.3; transform: scale(1); }
-          50% { opacity: 0.5; transform: scale(1.05); }
+          0%, 100% { 
+            opacity: 1;
+            transform: scale(1);
+          }
+          50% { 
+            opacity: 0.5;
+            transform: scale(0.95);
+          }
         }
       `}</style>
     </div>
