@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { getFailposts, createFailpost, addFailpostReaction } from "../api/failposts";
+import { getFailposts, createFailpost, addFailpostReaction, getFailpostDetail } from "../api/failposts";
 import { useAuth } from "../contexts/AuthContext";
 
 interface Post {
@@ -65,16 +65,45 @@ export default function ExplorePage() {
       setError(null);
       const fetchedPosts = await getFailposts(tag);
       
-      // API 응답을 UI에 맞게 변환
-      const transformedPosts: Post[] = fetchedPosts.map(post => ({
-        ...post,
-        reactions: {
-          'drink!': 0,
-          'me too': 0,
-          'it\'s okay': 0
-        },
-        userReaction: null
-      }));
+      // 각 게시물의 상세 정보를 가져와서 실제 반응 수를 설정
+      const transformedPosts: Post[] = await Promise.all(
+        fetchedPosts.map(async (post) => {
+          try {
+            const postDetail = await getFailpostDetail(post.id);
+            
+            // 반응 배열을 객체로 변환
+            const reactions = {
+              'drink!': 0,
+              'me too': 0,
+              'it\'s okay': 0
+            };
+            
+            postDetail.reactions.forEach(reaction => {
+              if (reaction.type === 'drink!' || reaction.type === 'me too' || reaction.type === 'it\'s okay') {
+                reactions[reaction.type] = reaction.count;
+              }
+            });
+            
+            return {
+              ...post,
+              reactions,
+              userReaction: null // TODO: 사용자의 현재 반응 상태를 가져오는 API가 있다면 여기서 설정
+            };
+          } catch (err) {
+            console.error(`Failed to load reactions for post ${post.id}:`, err);
+            // 실패한 경우 기본값 사용
+            return {
+              ...post,
+              reactions: {
+                'drink!': 0,
+                'me too': 0,
+                'it\'s okay': 0
+              },
+              userReaction: null
+            };
+          }
+        })
+      );
       
       setPosts(transformedPosts);
     } catch (err) {
