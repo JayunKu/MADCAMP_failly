@@ -214,8 +214,8 @@ export default function MyPage() {
           position: 'absolute',
           top: '50%',
           left: '80px',
-          width: '60px',
-          height: '60px',
+                width: '80px',
+                height: '80px',
           background: 'linear-gradient(135deg, #f3f4f6, #e5e7eb)',
           borderRadius: '50%',
           opacity: 0.35
@@ -747,14 +747,9 @@ export default function MyPage() {
               <div style={{
                 width: '100%',
                 height: '100%',
-                background: 'white',
-                borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 8px 20px rgba(0, 0, 0, 0.15)',
-                border: '3px solid #e5e7eb',
-                overflow: 'hidden',
                 position: 'relative'
               }}>
                 {placedBadge.badge.badge_image_url ? (
@@ -764,11 +759,15 @@ export default function MyPage() {
                     style={{
                       width: '100%',
                       height: '100%',
-                      objectFit: 'cover'
+                      objectFit: 'contain',
+                      filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))'
                     }}
                   />
                 ) : (
-                  <span style={{ fontSize: '24px' }}>🏆</span>
+                  <span style={{ 
+                    fontSize: '48px',
+                    filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))'
+                  }}>🏆</span>
                 )}
                 
                 {/* 제거 버튼 (호버 시 표시) */}
