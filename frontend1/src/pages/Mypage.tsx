@@ -728,8 +728,8 @@ export default function MyPage() {
                 position: 'absolute',
                 left: `${placedBadge.x}%`,
                 top: `${placedBadge.y}%`,
-                width: '60px',
-                height: '60px',
+                width: '120px',
+                height: '120px',
                 zIndex: 5,
                 cursor: 'pointer',
                 transition: 'all 0.2s ease'
@@ -771,25 +771,30 @@ export default function MyPage() {
                 )}
                 
                 {/* 제거 버튼 (호버 시 표시) */}
-                <div style={{
-                  position: 'absolute',
-                  top: '-8px',
-                  right: '-8px',
-                  width: '20px',
-                  height: '20px',
-                  background: '#dc2626',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  fontSize: '12px',
-                  fontWeight: 'bold',
-                  opacity: 0,
-                  transition: 'opacity 0.2s ease',
-                  cursor: 'pointer'
-                }}
-                className="remove-btn"
+                <div 
+                  style={{
+                    position: 'absolute',
+                    top: '-8px',
+                    right: '-8px',
+                    width: '20px',
+                    height: '20px',
+                    background: '#dc2626',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    opacity: 0,
+                    transition: 'opacity 0.2s ease',
+                    cursor: 'pointer'
+                  }}
+                  className="remove-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removePlacedBadge(placedBadge.id);
+                  }}
                 >
                   ×
                 </div>
