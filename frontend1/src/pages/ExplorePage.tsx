@@ -723,11 +723,102 @@ export default function ExplorePage() {
         </div>
       )}
 
+      {/* 귀여운 고양이 배경 장식들 */}
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        pointerEvents: 'none',
+        zIndex: 1,
+        overflow: 'hidden'
+      }}>
+        {/* 왼쪽 하단 고양이 */}
+        <img 
+          src="/assets/cat1.png" 
+          alt="cat decoration"
+          style={{
+            position: 'absolute',
+            bottom: '40px',
+            left: '20px',
+            width: '120px',
+            height: '120px',
+            opacity: 0.15,
+            transform: 'rotate(-15deg)',
+            filter: 'blur(0.5px)'
+          }}
+        />
+        
+        {/* 오른쪽 상단 고양이 */}
+        <img 
+          src="/assets/cat2.png" 
+          alt="cat decoration"
+          style={{
+            position: 'absolute',
+            top: '120px',
+            right: '30px',
+            width: '100px',
+            height: '100px',
+            opacity: 0.12,
+            transform: 'rotate(20deg)',
+            filter: 'blur(0.5px)'
+          }}
+        />
+        
+        {/* 왼쪽 중간 고양이 */}
+        <img 
+          src="/assets/cat3.png" 
+          alt="cat decoration"
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '10px',
+            width: '80px',
+            height: '80px',
+            opacity: 0.1,
+            transform: 'rotate(-10deg)',
+            filter: 'blur(0.5px)'
+          }}
+        />
+        
+        {/* 오른쪽 하단 고양이 */}
+        <img 
+          src="/assets/cat4.png" 
+          alt="cat decoration"
+          style={{
+            position: 'absolute',
+            bottom: '200px',
+            right: '15px',
+            width: '90px',
+            height: '90px',
+            opacity: 0.13,
+            transform: 'rotate(25deg)',
+            filter: 'blur(0.5px)'
+          }}
+        />
+        
+        {/* 중앙 상단 고양이 */}
+        <img 
+          src="/assets/cat5.png" 
+          alt="cat decoration"
+          style={{
+            position: 'absolute',
+            top: '200px',
+            left: '50%',
+            transform: 'translateX(-50%) rotate(-5deg)',
+            width: '70px',
+            height: '70px',
+            opacity: 0.08,
+            filter: 'blur(0.5px)'
+          }}
+        />
+      </div>
+
       {/* 메인 피드 */}
       <div style={{
         maxWidth: '1200px',
         margin: '0 auto',
-        padding: '24px 16px'
+        padding: '24px 16px',
+        position: 'relative',
+        zIndex: 10
       }}>
         {loading && posts.length === 0 ? (
           <div style={{

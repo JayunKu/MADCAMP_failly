@@ -226,11 +226,102 @@ export default function ChatPage() {
         </div>
       </div>
 
+      {/* 귀여운 고양이 배경 장식들 */}
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        pointerEvents: 'none',
+        zIndex: 1,
+        overflow: 'hidden'
+      }}>
+        {/* 왼쪽 상단 고양이 */}
+        <img 
+          src="/assets/cat1.png" 
+          alt="cat decoration"
+          style={{
+            position: 'absolute',
+            top: '150px',
+            left: '25px',
+            width: '110px',
+            height: '110px',
+            opacity: 0.12,
+            transform: 'rotate(-20deg)',
+            filter: 'blur(0.5px)'
+          }}
+        />
+        
+        {/* 오른쪽 중간 고양이 */}
+        <img 
+          src="/assets/cat2.png" 
+          alt="cat decoration"
+          style={{
+            position: 'absolute',
+            top: '40%',
+            right: '20px',
+            width: '95px',
+            height: '95px',
+            opacity: 0.1,
+            transform: 'rotate(15deg)',
+            filter: 'blur(0.5px)'
+          }}
+        />
+        
+        {/* 왼쪽 하단 고양이 */}
+        <img 
+          src="/assets/cat3.png" 
+          alt="cat decoration"
+          style={{
+            position: 'absolute',
+            bottom: '120px',
+            left: '15px',
+            width: '85px',
+            height: '85px',
+            opacity: 0.14,
+            transform: 'rotate(-8deg)',
+            filter: 'blur(0.5px)'
+          }}
+        />
+        
+        {/* 오른쪽 상단 고양이 */}
+        <img 
+          src="/assets/cat4.png" 
+          alt="cat decoration"
+          style={{
+            position: 'absolute',
+            top: '180px',
+            right: '35px',
+            width: '75px',
+            height: '75px',
+            opacity: 0.09,
+            transform: 'rotate(30deg)',
+            filter: 'blur(0.5px)'
+          }}
+        />
+        
+        {/* 중앙 하단 고양이 */}
+        <img 
+          src="/assets/cat5.png" 
+          alt="cat decoration"
+          style={{
+            position: 'absolute',
+            bottom: '60px',
+            left: '50%',
+            transform: 'translateX(-50%) rotate(12deg)',
+            width: '100px',
+            height: '100px',
+            opacity: 0.11,
+            filter: 'blur(0.5px)'
+          }}
+        />
+      </div>
+
       {/* 채팅방 목록 */}
       <div style={{
         maxWidth: '800px',
         margin: '0 auto',
-        padding: '24px 16px'
+        padding: '24px 16px',
+        position: 'relative',
+        zIndex: 10
       }}>
         {chatRooms.length > 0 ? (
           <div style={{
