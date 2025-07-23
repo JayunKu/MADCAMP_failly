@@ -16,6 +16,15 @@ export default function MyPage() {
   const [userInfo, setUserInfo] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedBadge, setSelectedBadge] = useState<any>(null);
+  const [placedBadges, setPlacedBadges] = useState<Array<{
+    badge: any;
+    x: number;
+    y: number;
+    id: string;
+  }>>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   // 사용자 정보 로드
   useEffect(() => {
@@ -48,6 +57,60 @@ export default function MyPage() {
       ]);
       setNewMessage('');
     }
+  };
+
+  // 배지 선택 핸들러
+  const handleBadgeSelect = (badge: any) => {
+    setSelectedBadge(badge);
+  };
+
+  // 드래그 시작
+  const handleDragStart = (e: React.MouseEvent, badge: any) => {
+    e.preventDefault();
+    setSelectedBadge(badge);
+    setIsDragging(true);
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  };
+
+  // 드래그 중
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && selectedBadge) {
+      // 마우스 커서를 따라다니는 배지 표시 (실제 구현에서는 포인터 이벤트 사용)
+    }
+  };
+
+  // 드롭 핸들러
+  const handleDrop = (e: React.MouseEvent) => {
+    if (isDragging && selectedBadge) {
+      const centerArea = e.currentTarget.getBoundingClientRect();
+      const x = ((e.clientX - centerArea.left - dragOffset.x) / centerArea.width) * 100;
+      const y = ((e.clientY - centerArea.top - dragOffset.y) / centerArea.height) * 100;
+      
+      // 경계 체크
+      if (x >= 0 && x <= 95 && y >= 0 && y <= 95) {
+        const newPlacedBadge = {
+          badge: selectedBadge,
+          x: Math.max(0, Math.min(95, x)),
+          y: Math.max(0, Math.min(95, y)),
+          id: `${selectedBadge.badge_name}-${Date.now()}`
+        };
+        
+        setPlacedBadges(prev => [...prev, newPlacedBadge]);
+      }
+      
+      setIsDragging(false);
+      setSelectedBadge(null);
+    }
+  };
+
+  // 배치된 배지 제거
+  const removePlacedBadge = (id: string) => {
+    setPlacedBadges(prev => prev.filter(badge => badge.id !== id));
   };
 
   return (
@@ -541,14 +604,22 @@ export default function MyPage() {
         </div>
 
         {/* 중앙 꾸밀 수 있는 공간 */}
-        <div style={{
-          background: 'white',
-          borderRadius: '20px',
-          boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-          border: '1px solid #e5e7eb',
-          overflow: 'hidden',
-          position: 'relative'
-        }}>
+        <div 
+          style={{
+            background: 'white',
+            borderRadius: '20px',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+            border: isDragging ? '3px dashed #0ea5e9' : '1px solid #e5e7eb',
+            overflow: 'hidden',
+            position: 'relative',
+            transition: 'all 0.2s ease',
+            cursor: isDragging ? 'copy' : 'default'
+          }}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleDrop}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={handleDrop}
+        >
           <img 
             src="/assets/background.png" 
             alt="Background" 
@@ -558,6 +629,137 @@ export default function MyPage() {
               objectFit: 'cover'
             }}
           />
+          
+          {/* 드래그 중일 때 오버레이 */}
+          {isDragging && (
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(14, 165, 233, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 10
+            }}>
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.95)',
+                borderRadius: '16px',
+                padding: '20px',
+                textAlign: 'center',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+              }}>
+                <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🎯</div>
+                <p style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: '#0ea5e9',
+                  margin: 0
+                }}>여기에 배지를 놓아주세요!</p>
+              </div>
+            </div>
+          )}
+
+          {/* 배치된 배지들 */}
+          {placedBadges.map((placedBadge) => (
+            <div
+              key={placedBadge.id}
+              className="placed-badge"
+              style={{
+                position: 'absolute',
+                left: `${placedBadge.x}%`,
+                top: `${placedBadge.y}%`,
+                width: '60px',
+                height: '60px',
+                zIndex: 5,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onClick={() => removePlacedBadge(placedBadge.id)}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.1)';
+                e.currentTarget.style.zIndex = '6';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.zIndex = '5';
+              }}
+            >
+              <div style={{
+                width: '100%',
+                height: '100%',
+                background: 'linear-gradient(135deg, #f59e0b, #fbbf24)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 8px 20px rgba(245, 158, 11, 0.4)',
+                border: '3px solid white',
+                overflow: 'hidden',
+                position: 'relative'
+              }}>
+                {placedBadge.badge.badge_image_url ? (
+                  <img 
+                    src={placedBadge.badge.badge_image_url} 
+                    alt={placedBadge.badge.badge_name}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
+                  />
+                ) : (
+                  <span style={{ fontSize: '24px' }}>🏆</span>
+                )}
+                
+                {/* 제거 버튼 (호버 시 표시) */}
+                <div style={{
+                  position: 'absolute',
+                  top: '-8px',
+                  right: '-8px',
+                  width: '20px',
+                  height: '20px',
+                  background: '#dc2626',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  opacity: 0,
+                  transition: 'opacity 0.2s ease',
+                  cursor: 'pointer'
+                }}
+                className="remove-btn"
+                >
+                  ×
+                </div>
+              </div>
+              
+              {/* 배지 이름 툴팁 */}
+              <div style={{
+                position: 'absolute',
+                bottom: '-30px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: 'rgba(0, 0, 0, 0.8)',
+                color: 'white',
+                padding: '4px 8px',
+                borderRadius: '6px',
+                fontSize: '10px',
+                fontWeight: '600',
+                whiteSpace: 'nowrap',
+                opacity: 0,
+                transition: 'opacity 0.2s ease',
+                pointerEvents: 'none'
+              }}
+              className="badge-tooltip"
+              >
+                {placedBadge.badge.badge_name}
+              </div>
+            </div>
+          ))}
+
           <div style={{
             position: 'absolute',
             bottom: '20px',
@@ -574,7 +776,37 @@ export default function MyPage() {
               fontWeight: '600',
               margin: 0
             }}>나만의 특별한 공간 ✨</p>
+            {placedBadges.length > 0 && (
+              <p style={{
+                fontSize: '12px',
+                color: '#6b7280',
+                margin: '4px 0 0 0'
+              }}>배지 {placedBadges.length}개 배치됨</p>
+            )}
           </div>
+
+          {/* 안내 메시지 (배지가 없을 때) */}
+          {placedBadges.length === 0 && !isDragging && (
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              textAlign: 'center',
+              background: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: '16px',
+              padding: '20px',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+            }}>
+              <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🎨</div>
+              <p style={{
+                fontSize: '14px',
+                color: '#6b7280',
+                margin: 0,
+                fontWeight: '500'
+              }}>오른쪽에서 배지를 선택하고<br/>여기로 드래그해서 꾸며보세요!</p>
+            </div>
+          )}
         </div>
 
         {/* 오른쪽 영역 */}
@@ -683,21 +915,28 @@ export default function MyPage() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '12px',
-                    background: '#f9fafb',
+                    background: selectedBadge === badge ? '#e0f2fe' : '#f9fafb',
                     borderRadius: '12px',
                     padding: '12px',
-                    border: '1px solid #e5e7eb',
-                    transition: 'all 0.2s ease'
+                    border: selectedBadge === badge ? '2px solid #0ea5e9' : '1px solid #e5e7eb',
+                    transition: 'all 0.2s ease',
+                    cursor: 'pointer'
                   }}
+                  onClick={() => handleBadgeSelect(badge)}
+                  onMouseDown={(e) => handleDragStart(e, badge)}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#f3f4f6';
-                    e.currentTarget.style.transform = 'translateX(-4px)';
-                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)';
+                    if (selectedBadge !== badge) {
+                      e.currentTarget.style.background = '#f3f4f6';
+                      e.currentTarget.style.transform = 'translateX(-4px)';
+                      e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)';
+                    }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = '#f9fafb';
-                    e.currentTarget.style.transform = 'translateX(0)';
-                    e.currentTarget.style.boxShadow = 'none';
+                    if (selectedBadge !== badge) {
+                      e.currentTarget.style.background = '#f9fafb';
+                      e.currentTarget.style.transform = 'translateX(0)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }
                   }}
                   >
                     <div style={{
@@ -740,6 +979,13 @@ export default function MyPage() {
                         lineHeight: '1.3'
                       }}>{badge.badge_tag} 카테고리</div>
                     </div>
+                    {selectedBadge === badge && (
+                      <div style={{
+                        fontSize: '12px',
+                        color: '#0ea5e9',
+                        fontWeight: '600'
+                      }}>드래그하세요!</div>
+                    )}
                   </div>
                 ))}
 
@@ -812,6 +1058,14 @@ export default function MyPage() {
         @keyframes slideInRight {
           from { opacity: 0; transform: translateX(100%); }
           to { opacity: 1; transform: translateX(0); }
+        }
+        
+        /* 배지 호버 효과 */
+        .placed-badge:hover .remove-btn {
+          opacity: 1 !important;
+        }
+        .placed-badge:hover .badge-tooltip {
+          opacity: 1 !important;
         }
       `}</style>
     </div>

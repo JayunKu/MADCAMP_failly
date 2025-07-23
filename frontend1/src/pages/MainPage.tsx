@@ -231,27 +231,81 @@ export default function MainPage() {
           <p style={{ fontSize: '18px', color: '#6b7280', fontWeight: '500' }}>실패를 공유하고 함께 성장해요 ✨</p>
         </div>
         
-        <div style={{ position: 'relative' }}>
+        <div style={{ 
+          position: 'relative',
+          width: '500px',
+          height: '400px'
+        }}>
+          {/* 배경 글로우 효과 */}
           <div style={{
             position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(135deg, #9ca3af, #6b7280)',
-            borderRadius: '24px',
-            filter: 'blur(20px)',
-            opacity: 0.2,
-            transform: 'scale(1.1)'
+            inset: '-20px',
+            background: 'radial-gradient(ellipse at center, rgba(156, 163, 175, 0.3) 0%, rgba(156, 163, 175, 0.1) 40%, transparent 70%)',
+            filter: 'blur(30px)',
+            zIndex: 1
           }}></div>
-          <img
-            src="/assets/main-bg.png"
-            alt="Failly Main"
-            style={{
-              position: 'relative',
-              width: '400px',
-              borderRadius: '24px',
-              boxShadow: '0 25px 50px rgba(0,0,0,0.15)',
-              border: '4px solid rgba(255,255,255,0.8)'
-            }}
-          />
+          
+          {/* 메인 이미지 컨테이너 */}
+          <div style={{
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+            zIndex: 2
+          }}>
+            <img
+              src="/assets/main-bg.png"
+              alt="Failly Main"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                position: 'relative',
+                zIndex: 1
+              }}
+            />
+            
+            {/* 페이드 아웃 마스크 오버레이 */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: `
+                radial-gradient(ellipse 80% 70% at center, transparent 30%, rgba(248, 250, 252, 0.1) 50%, rgba(248, 250, 252, 0.3) 70%, rgba(248, 250, 252, 0.6) 85%, rgba(248, 250, 252, 0.9) 95%, rgba(248, 250, 252, 1) 100%),
+                linear-gradient(to bottom, transparent 20%, rgba(248, 250, 252, 0.05) 60%, rgba(248, 250, 252, 0.2) 80%, rgba(248, 250, 252, 0.5) 90%, rgba(248, 250, 252, 0.8) 95%, rgba(248, 250, 252, 1) 100%),
+                linear-gradient(to top, transparent 20%, rgba(248, 250, 252, 0.05) 60%, rgba(248, 250, 252, 0.2) 80%, rgba(248, 250, 252, 0.5) 90%, rgba(248, 250, 252, 0.8) 95%, rgba(248, 250, 252, 1) 100%),
+                linear-gradient(to right, transparent 20%, rgba(248, 250, 252, 0.05) 60%, rgba(248, 250, 252, 0.2) 80%, rgba(248, 250, 252, 0.5) 90%, rgba(248, 250, 252, 0.8) 95%, rgba(248, 250, 252, 1) 100%),
+                linear-gradient(to left, transparent 20%, rgba(248, 250, 252, 0.05) 60%, rgba(248, 250, 252, 0.2) 80%, rgba(248, 250, 252, 0.5) 90%, rgba(248, 250, 252, 0.8) 95%, rgba(248, 250, 252, 1) 100%)
+              `,
+              zIndex: 2,
+              pointerEvents: 'none'
+            }}></div>
+            
+            {/* 중앙 하이라이트 */}
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '60%',
+              height: '60%',
+              background: 'radial-gradient(ellipse at center, transparent 0%, transparent 40%, rgba(255, 255, 255, 0.1) 70%, rgba(255, 255, 255, 0.2) 100%)',
+              borderRadius: '50%',
+              zIndex: 3,
+              pointerEvents: 'none'
+            }}></div>
+          </div>
+          
+          {/* 부드러운 그림자 */}
+          <div style={{
+            position: 'absolute',
+            bottom: '-40px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '80%',
+            height: '20px',
+            background: 'radial-gradient(ellipse at center, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.05) 50%, transparent 100%)',
+            filter: 'blur(10px)',
+            zIndex: 0
+          }}></div>
         </div>
       </div>
 
