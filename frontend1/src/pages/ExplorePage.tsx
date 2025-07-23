@@ -563,9 +563,9 @@ export default function ExplorePage() {
                             src="/assets/reaction/drink.png" 
                             alt="한잔해~" 
                             style={{
-                              width: '50px',
-                              height: '50px',
-                              objectFit: 'contain',
+                              width: '75px',
+                              height: '75px',
+                              objectFit: 'cover',
                               filter: post.userReaction === 'drink!' ? 'brightness(1.1)' : 'none'
                             }}
                           />
@@ -639,9 +639,9 @@ export default function ExplorePage() {
                             src="/assets/reaction/metoo.png" 
                             alt="나도!" 
                             style={{
-                              width: '50px',
-                              height: '50px',
-                              objectFit: 'contain',
+                              width: '75px',
+                              height: '75px',
+                              objectFit: 'cover',
                               filter: post.userReaction === 'me too' ? 'brightness(1.1)' : 'none'
                             }}
                           />
@@ -715,9 +715,9 @@ export default function ExplorePage() {
                             src="/assets/reaction/thatsok.png" 
                             alt="괜찮아" 
                             style={{
-                              width: '40px',
-                              height: '40px',
-                              objectFit: 'contain',
+                              width: '60px',
+                              height: '60px',
+                              objectFit: 'cover',
                               filter: post.userReaction === 'it\'s okay' ? 'brightness(1.1)' : 'none'
                             }}
                           />
