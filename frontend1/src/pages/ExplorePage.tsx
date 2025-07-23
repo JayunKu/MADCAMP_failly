@@ -514,9 +514,10 @@ export default function ExplorePage() {
                   }}>
                     <div style={{
                       display: 'flex',
-                      alignItems: 'center',
+                      alignItems: 'flex-end',
                       justifyContent: 'space-around',
-                      gap: '8px'
+                      gap: '8px',
+                      minHeight: '180px'
                     }}>
                       {/* 한잔해~ (drink!) */}
                       <button 
@@ -525,14 +526,15 @@ export default function ExplorePage() {
                           display: 'flex',
                           flexDirection: 'column',
                           alignItems: 'center',
-                          gap: '4px',
+                          justifyContent: 'flex-end',
                           background: post.userReaction === 'drink!' ? '#fef3c7' : 'transparent',
                           border: post.userReaction === 'drink!' ? '2px solid #f59e0b' : '2px solid transparent',
                           borderRadius: '12px',
                           padding: '8px 12px',
                           cursor: 'pointer',
                           transition: 'all 0.2s ease',
-                          minWidth: '70px'
+                          flex: 1,
+                          height: '100%'
                         }}
                         onMouseEnter={(e) => {
                           if (post.userReaction !== 'drink!') {
@@ -545,15 +547,23 @@ export default function ExplorePage() {
                           }
                         }}
                       >
-                        <img 
-                          src="/assets/reaction/drink.png" 
-                          alt="한잔해~" 
-                          style={{
-                            width: '128px',
-                            height: '128px',
-                            objectFit: 'contain'
-                          }}
-                        />
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: '128px',
+                          marginBottom: '8px'
+                        }}>
+                          <img 
+                            src="/assets/reaction/drink.png" 
+                            alt="한잔해~" 
+                            style={{
+                              width: '128px',
+                              height: '128px',
+                              objectFit: 'contain'
+                            }}
+                          />
+                        </div>
                         <div style={{
                           display: 'flex',
                           flexDirection: 'column',
@@ -580,14 +590,15 @@ export default function ExplorePage() {
                           display: 'flex',
                           flexDirection: 'column',
                           alignItems: 'center',
-                          gap: '4px',
+                          justifyContent: 'flex-end',
                           background: post.userReaction === 'me too' ? '#dbeafe' : 'transparent',
                           border: post.userReaction === 'me too' ? '2px solid #3b82f6' : '2px solid transparent',
                           borderRadius: '12px',
                           padding: '8px 12px',
                           cursor: 'pointer',
                           transition: 'all 0.2s ease',
-                          minWidth: '70px'
+                          flex: 1,
+                          height: '100%'
                         }}
                         onMouseEnter={(e) => {
                           if (post.userReaction !== 'me too') {
@@ -600,15 +611,23 @@ export default function ExplorePage() {
                           }
                         }}
                       >
-                        <img 
-                          src="/assets/reaction/metoo.png" 
-                          alt="나도!" 
-                          style={{
-                            width: '128px',
-                            height: '128px',
-                            objectFit: 'contain'
-                          }}
-                        />
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: '128px',
+                          marginBottom: '8px'
+                        }}>
+                          <img 
+                            src="/assets/reaction/metoo.png" 
+                            alt="나도!" 
+                            style={{
+                              width: '128px',
+                              height: '128px',
+                              objectFit: 'contain'
+                            }}
+                          />
+                        </div>
                         <div style={{
                           display: 'flex',
                           flexDirection: 'column',
@@ -635,14 +654,15 @@ export default function ExplorePage() {
                           display: 'flex',
                           flexDirection: 'column',
                           alignItems: 'center',
-                          gap: '4px',
+                          justifyContent: 'flex-end',
                           background: post.userReaction === 'it\'s okay' ? '#dcfce7' : 'transparent',
                           border: post.userReaction === 'it\'s okay' ? '2px solid #22c55e' : '2px solid transparent',
                           borderRadius: '12px',
                           padding: '8px 12px',
                           cursor: 'pointer',
                           transition: 'all 0.2s ease',
-                          minWidth: '70px'
+                          flex: 1,
+                          height: '100%'
                         }}
                         onMouseEnter={(e) => {
                           if (post.userReaction !== 'it\'s okay') {
@@ -655,15 +675,23 @@ export default function ExplorePage() {
                           }
                         }}
                       >
-                        <img 
-                          src="/assets/reaction/thatsok.png" 
-                          alt="괜찮아" 
-                          style={{
-                            width: '64px',
-                            height: '64px',
-                            objectFit: 'contain'
-                          }}
-                        />
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: '128px',
+                          marginBottom: '8px'
+                        }}>
+                          <img 
+                            src="/assets/reaction/thatsok.png" 
+                            alt="괜찮아" 
+                            style={{
+                              width: '64px',
+                              height: '64px',
+                              objectFit: 'contain'
+                            }}
+                          />
+                        </div>
                         <div style={{
                           display: 'flex',
                           flexDirection: 'column',
