@@ -81,8 +81,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
    * 사용자를 대기열에 추가하고 매칭을 시도합니다.
    */
   public async tryMatchUser(userId: string) {
+    console.log(`🔥 [ChatGateway] tryMatchUser called for userId: ${userId}`);
+    
     // 1. DB에서 사용자의 최신 정보 조회
     const currentUser = await this.prisma.user.findUnique({ where: { id: userId } });
+    console.log(`🔥 [ChatGateway] User found in DB:`, currentUser ? `${currentUser.nickname} (${currentUser.id})` : 'null');
     if (!currentUser || !currentUser.current_tag) {
       console.log(`- Matching attempt failed: User ${userId} has no current_tag.`);
       return;

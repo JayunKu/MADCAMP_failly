@@ -63,7 +63,9 @@ export class FailpostsService {
     });
 
     // 6. ChatGateway를 통해 매칭 로직 실행
+    console.log(`🎯 [FailpostsService] Calling tryMatchUser for user ${user_id} with tag ${tag}`);
     this.chatGateway.tryMatchUser(user_id);
+    console.log(`🎯 [FailpostsService] tryMatchUser call completed for user ${user_id}`);
 
     return {
       message: 'success',

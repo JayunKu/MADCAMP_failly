@@ -22,6 +22,10 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [socket, setSocket] = useState<Socket | null>(null);
 
+  // 24:00 스톱워치 상태
+  const [timeLeft, setTimeLeft] = useState(24 * 60); // 24분 = 1440초
+  const [isTimerActive, setIsTimerActive] = useState(false);
+
   const userId = user?.id;
 
   // 채팅 상대 유저를 chatRoomInfo로부터 실시간 계산
@@ -36,12 +40,42 @@ export default function ChatPage() {
   console.log('opponent exists:', !!opponent);
   console.log('Input should be enabled:', !!(chatRoomInfo && opponent));
 
+  // 24:00 스톱워치 타이머
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    
+    if (isTimerActive && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft(time => time - 1);
+      }, 1000);
+    } else if (timeLeft === 0) {
+      setIsTimerActive(false);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isTimerActive, timeLeft]);
+
+  // 페이지 진입 시 타이머 시작
+  useEffect(() => {
+    setTimeLeft(24 * 60); // 24분 초기화
+    setIsTimerActive(true);
+  }, []);
+
   // 페이지 떠날 때 알림 제거
   useEffect(() => {
     return () => {
       clearChatNotification();
     };
   }, [clearChatNotification]);
+
+  // 시간 포맷팅 함수
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   // 소켓 연결 및 이벤트 설정
   useEffect(() => {
@@ -98,7 +132,7 @@ export default function ChatPage() {
   }, [messages]);
 
   const handleSendMessage = () => {
-    if (newMessage.trim() && socket && chatRoomInfo?.roomId) {
+    if (newMessage.trim() && socket) {
       const newMsg: Message = {
         id: Date.now(),
         sender: '나',
@@ -108,11 +142,11 @@ export default function ChatPage() {
       };
       setMessages(prev => [...prev, newMsg]);
       
-      // 서버에 메시지 전송
-      sendSocketMessage(chatRoomInfo.roomId, newMessage);
+      // 서버에 메시지 전송 (채팅방이 있을 때만)
+      if (chatRoomInfo?.roomId) {
+        sendSocketMessage(chatRoomInfo.roomId, newMessage);
+      }
       setNewMessage('');
-    } else {
-      console.error("Socket not connected or not in a room.");
     }
   };
 
@@ -167,6 +201,46 @@ export default function ChatPage() {
           borderRadius: '50%',
           opacity: 0.35
         }}></div>
+      </div>
+
+      {/* 24:00 스톱워치 UI */}
+      <div style={{
+        position: 'absolute',
+        top: '50px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 15,
+        background: 'linear-gradient(135deg, #1f2937, #374151)',
+        borderRadius: '20px',
+        padding: '12px 20px',
+        boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+        border: '2px solid rgba(255,255,255,0.1)'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          color: 'white',
+          fontSize: '16px',
+          fontWeight: 'bold',
+          fontFamily: 'monospace'
+        }}>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: timeLeft > 300 ? '#10b981' : timeLeft > 60 ? '#f59e0b' : '#ef4444',
+            animation: timeLeft <= 60 ? 'pulse 1s infinite' : 'none'
+          }}></div>
+          <span>{formatTime(timeLeft)}</span>
+          <div style={{
+            fontSize: '12px',
+            color: 'rgba(255,255,255,0.7)',
+            marginLeft: '4px'
+          }}>
+            남음
+          </div>
+        </div>
       </div>
 
       {/* 핸드폰 프레임 */}
@@ -489,19 +563,17 @@ export default function ChatPage() {
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                    placeholder={chatRoomInfo && opponent ? "메시지를 입력하세요..." : "매칭 대기 중입니다..."}
-                    disabled={!chatRoomInfo || !opponent}
+                    placeholder={opponent ? `${opponent.nickname}님과 대화 중...` : "자유롭게 메시지를 입력하세요..."}
                     style={{
                       width: '100%',
-                    padding: '12px 16px',
-                    background: (!chatRoomInfo || !opponent) ? '#f3f4f6' : '#f9fafb',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '20px',
-                    fontSize: '14px',
-                    outline: 'none',
-                    transition: 'all 0.2s ease',
-                    opacity: (!chatRoomInfo || !opponent) ? 0.6 : 1
-                  }}
+                      padding: '12px 16px',
+                      background: '#f9fafb',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '20px',
+                      fontSize: '14px',
+                      outline: 'none',
+                      transition: 'all 0.2s ease'
+                    }}
                   onFocus={(e) => {
                     e.currentTarget.style.borderColor = '#6b7280';
                     e.currentTarget.style.background = 'white';
@@ -539,32 +611,32 @@ export default function ChatPage() {
               
               <button
                 onClick={handleSendMessage}
-                disabled={!newMessage.trim() || !chatRoomInfo || !opponent}
+                disabled={!newMessage.trim()}
                 style={{
                   width: '36px',
                   height: '36px',
                   borderRadius: '50%',
                   border: 'none',
-                  cursor: (newMessage.trim() && chatRoomInfo && opponent) ? 'pointer' : 'not-allowed',
+                  cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
                   fontSize: '16px',
                   color: 'white',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   transition: 'all 0.2s ease',
-                  background: (newMessage.trim() && chatRoomInfo && opponent)
+                  background: newMessage.trim()
                     ? 'linear-gradient(135deg, #1f2937, #374151)' 
                     : '#9ca3af',
-                  boxShadow: (newMessage.trim() && chatRoomInfo && opponent) ? '0 4px 12px rgba(31, 41, 55, 0.3)' : 'none'
+                  boxShadow: newMessage.trim() ? '0 4px 12px rgba(31, 41, 55, 0.3)' : 'none'
                 }}
                 onMouseEnter={(e) => {
-                  if (newMessage.trim() && chatRoomInfo && opponent) {
+                  if (newMessage.trim()) {
                     e.currentTarget.style.background = 'linear-gradient(135deg, #111827, #1f2937)';
                     e.currentTarget.style.transform = 'scale(1.05)';
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (newMessage.trim() && chatRoomInfo && opponent) {
+                  if (newMessage.trim()) {
                     e.currentTarget.style.background = 'linear-gradient(135deg, #1f2937, #374151)';
                     e.currentTarget.style.transform = 'scale(1)';
                   }
@@ -636,6 +708,10 @@ export default function ChatPage() {
         @keyframes pulse {
           0%, 100% { opacity: 0.3; transform: scale(1); }
           50% { opacity: 0.5; transform: scale(1.05); }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
         }
       `}</style>
     </div>
