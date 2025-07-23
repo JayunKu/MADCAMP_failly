@@ -1,8 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getUserInfo } from "../api/users";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function MyPage() {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [guestbook, setGuestbook] = useState([
     { id: 1, author: '냥이친구', message: '프로필 너무 귀여워요! 🐱', time: '2시간 전' },
     { id: 2, author: '실패왕', message: '같이 실패 공유해요~', time: '1일 전' },
@@ -10,6 +13,32 @@ export default function MyPage() {
   ]);
   const [newMessage, setNewMessage] = useState('');
   const [showBadges, setShowBadges] = useState(false);
+  const [userInfo, setUserInfo] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // 사용자 정보 로드
+  useEffect(() => {
+    const loadUserInfo = async () => {
+      if (!isAuthenticated || !user?.id) {
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const userData = await getUserInfo(user.id);
+        setUserInfo(userData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : '사용자 정보를 불러오는데 실패했습니다.');
+        console.error('Failed to load user info:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserInfo();
+  }, [isAuthenticated, user?.id]);
 
   const addGuestbookEntry = () => {
     if (newMessage.trim()) {
@@ -622,15 +651,34 @@ export default function MyPage() {
                 flexDirection: 'column',
                 gap: '12px'
               }}>
-                {/* 획득한 배지들 */}
-                {[
-                  { emoji: '🏃‍♂️', name: '지각왕', desc: '지각 10회 달성', color: '#ef4444' },
-                  { emoji: '📚', name: '시험킬러', desc: '시험 망함 5회', color: '#3b82f6' },
-                  { emoji: '🍗', name: '다이어트실패', desc: '치킨 참지 못함', color: '#f59e0b' },
-                  { emoji: '😴', name: '늦잠러버', desc: '늦잠 연속 7일', color: '#8b5cf6' },
-                  { emoji: '📱', name: '폰중독', desc: '하루 8시간 이상', color: '#10b981' },
-                  { emoji: '🎮', name: '게임폐인', desc: '밤새 게임 10회', color: '#f97316' }
-                ].map((badge, index) => (
+                {/* 로딩 상태 */}
+                {loading && (
+                  <div style={{
+                    textAlign: 'center',
+                    padding: '20px',
+                    color: '#6b7280'
+                  }}>
+                    <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>⏳</div>
+                    <p>배지 정보를 불러오는 중...</p>
+                  </div>
+                )}
+
+                {/* 에러 상태 */}
+                {error && (
+                  <div style={{
+                    padding: '12px',
+                    background: '#fef2f2',
+                    border: '1px solid #fecaca',
+                    borderRadius: '8px',
+                    color: '#dc2626',
+                    fontSize: '14px'
+                  }}>
+                    {error}
+                  </div>
+                )}
+
+                {/* 실제 획득한 배지들 */}
+                {userInfo?.current_badges?.map((badge: any, index: number) => (
                   <div key={index} style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -655,16 +703,29 @@ export default function MyPage() {
                     <div style={{
                       width: '40px',
                       height: '40px',
-                      background: `linear-gradient(135deg, ${badge.color}, ${badge.color}dd)`,
+                      background: 'linear-gradient(135deg, #f59e0b, #fbbf24)',
                       borderRadius: '50%',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontSize: '18px',
-                      boxShadow: `0 4px 12px ${badge.color}40`,
-                      flexShrink: 0
+                      boxShadow: '0 4px 12px rgba(245, 158, 11, 0.4)',
+                      flexShrink: 0,
+                      overflow: 'hidden'
                     }}>
-                      {badge.emoji}
+                      {badge.badge_image_url ? (
+                        <img 
+                          src={badge.badge_image_url} 
+                          alt={badge.badge_name}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                      ) : (
+                        '🏆'
+                      )}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{
@@ -672,18 +733,31 @@ export default function MyPage() {
                         fontWeight: '600',
                         color: '#1f2937',
                         marginBottom: '2px'
-                      }}>{badge.name}</div>
+                      }}>{badge.badge_name}</div>
                       <div style={{
                         fontSize: '12px',
                         color: '#6b7280',
                         lineHeight: '1.3'
-                      }}>{badge.desc}</div>
+                      }}>{badge.badge_tag} 카테고리</div>
                     </div>
                   </div>
                 ))}
-                
+
+                {/* 배지가 없을 때 */}
+                {!loading && !error && (!userInfo?.current_badges || userInfo.current_badges.length === 0) && (
+                  <div style={{
+                    textAlign: 'center',
+                    padding: '20px',
+                    color: '#6b7280'
+                  }}>
+                    <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🏆</div>
+                    <p>아직 획득한 배지가 없어요!</p>
+                    <p style={{ fontSize: '12px', marginTop: '4px' }}>게시물을 작성해서 배지를 획득해보세요.</p>
+                  </div>
+                )}
+
                 {/* 빈 배지 슬롯 */}
-                {[1,2].map(i => (
+                {!loading && !error && userInfo?.current_badges && userInfo.current_badges.length > 0 && [1,2].map(i => (
                   <div key={`empty-${i}`} style={{
                     display: 'flex',
                     alignItems: 'center',

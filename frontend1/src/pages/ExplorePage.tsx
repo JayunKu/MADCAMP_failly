@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getFailposts, createFailpost, addFailpostReaction, getFailpostDetail } from "../api/failposts";
+import { obtainBadge } from "../api/users";
 import { useAuth } from "../contexts/AuthContext";
 
 interface Post {
@@ -186,6 +187,15 @@ export default function ExplorePage() {
         tag: selectedCategory,
         image: selectedImage || undefined
       });
+
+      // 게시물 작성 성공 시 배지 획득 시도
+      try {
+        await obtainBadge(user.id, { tag: selectedCategory });
+        console.log(`Badge obtained for category: ${selectedCategory}`);
+      } catch (badgeError) {
+        // 배지 획득 실패는 게시물 작성 성공에 영향을 주지 않음
+        console.warn('Failed to obtain badge:', badgeError);
+      }
 
       // 성공 시 게시물 목록 새로고침
       await loadPosts(selectedCategory);
