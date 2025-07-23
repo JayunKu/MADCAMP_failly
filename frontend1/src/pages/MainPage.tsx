@@ -232,13 +232,39 @@ export default function MainPage() {
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
-            filter: 'drop-shadow(0 4px 8px rgba(30, 41, 59, 0.15))'
+            filter: 'drop-shadow(0 4px 8px rgba(30, 41, 59, 0.15))',
+            animation: 'logoFloat 4s ease-in-out infinite, logoGlow 3s ease-in-out infinite alternate'
           }}>
             <span style={{
               position: 'relative',
               display: 'inline-block'
             }}>
-              failly
+              {/* 각 글자별로 개별 애니메이션 */}
+              <span style={{
+                display: 'inline-block',
+                animation: 'letterBounce1 2s ease-in-out infinite'
+              }}>f</span>
+              <span style={{
+                display: 'inline-block',
+                animation: 'letterBounce2 2s ease-in-out infinite 0.1s'
+              }}>a</span>
+              <span style={{
+                display: 'inline-block',
+                animation: 'letterBounce3 2s ease-in-out infinite 0.2s'
+              }}>i</span>
+              <span style={{
+                display: 'inline-block',
+                animation: 'letterBounce4 2s ease-in-out infinite 0.3s'
+              }}>l</span>
+              <span style={{
+                display: 'inline-block',
+                animation: 'letterBounce5 2s ease-in-out infinite 0.4s'
+              }}>l</span>
+              <span style={{
+                display: 'inline-block',
+                animation: 'letterBounce6 2s ease-in-out infinite 0.5s'
+              }}>y</span>
+              
               {/* 로고 하이라이트 효과 */}
               <div style={{
                 position: 'absolute',
@@ -246,11 +272,46 @@ export default function MainPage() {
                 left: '10%',
                 right: '10%',
                 height: '30%',
-                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
                 borderRadius: '50px',
                 filter: 'blur(8px)',
-                zIndex: -1
+                zIndex: -1,
+                animation: 'highlightSweep 6s ease-in-out infinite'
               }}></div>
+
+              {/* 반짝이는 별들 */}
+              <div style={{
+                position: 'absolute',
+                top: '-20px',
+                left: '10%',
+                fontSize: '24px',
+                animation: 'sparkle1 3s ease-in-out infinite'
+              }}>✨</div>
+              
+              <div style={{
+                position: 'absolute',
+                top: '-10px',
+                right: '15%',
+                fontSize: '18px',
+                animation: 'sparkle2 3s ease-in-out infinite 1s'
+              }}>⭐</div>
+              
+              <div style={{
+                position: 'absolute',
+                bottom: '-15px',
+                left: '20%',
+                fontSize: '20px',
+                animation: 'sparkle3 3s ease-in-out infinite 2s'
+              }}>💫</div>
+              
+              <div style={{
+                position: 'absolute',
+                bottom: '-20px',
+                right: '10%',
+                fontSize: '16px',
+                animation: 'sparkle4 3s ease-in-out infinite 0.5s'
+              }}>🌟</div>
+
             </span>
           </h1>
           <p style={{ 
@@ -668,6 +729,153 @@ export default function MainPage() {
       }}>
         <p style={{ fontSize: '14px', color: '#9ca3af', fontWeight: '500' }}>함께 실패하고, 함께 성장하는 공간</p>
       </div>
+
+      {/* CSS 애니메이션 정의 */}
+      <style>{`
+        @keyframes logoFloat {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
+        }
+
+        @keyframes logoGlow {
+          0% {
+            filter: drop-shadow(0 4px 8px rgba(30, 41, 59, 0.15));
+          }
+          100% {
+            filter: drop-shadow(0 8px 25px rgba(30, 41, 59, 0.3)) drop-shadow(0 0 40px rgba(251, 191, 36, 0.2));
+          }
+        }
+
+        @keyframes letterBounce1 {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          25% { transform: translateY(-8px) rotate(2deg); }
+          50% { transform: translateY(-4px) rotate(-1deg); }
+          75% { transform: translateY(-6px) rotate(1deg); }
+        }
+
+        @keyframes letterBounce2 {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          25% { transform: translateY(-6px) rotate(-2deg); }
+          50% { transform: translateY(-8px) rotate(1deg); }
+          75% { transform: translateY(-4px) rotate(-1deg); }
+        }
+
+        @keyframes letterBounce3 {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          25% { transform: translateY(-10px) rotate(1deg); }
+          50% { transform: translateY(-6px) rotate(-2deg); }
+          75% { transform: translateY(-8px) rotate(1deg); }
+        }
+
+        @keyframes letterBounce4 {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          25% { transform: translateY(-4px) rotate(-1deg); }
+          50% { transform: translateY(-10px) rotate(2deg); }
+          75% { transform: translateY(-6px) rotate(-1deg); }
+        }
+
+        @keyframes letterBounce5 {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          25% { transform: translateY(-8px) rotate(2deg); }
+          50% { transform: translateY(-4px) rotate(-1deg); }
+          75% { transform: translateY(-10px) rotate(1deg); }
+        }
+
+        @keyframes letterBounce6 {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          25% { transform: translateY(-6px) rotate(-2deg); }
+          50% { transform: translateY(-8px) rotate(1deg); }
+          75% { transform: translateY(-4px) rotate(-1deg); }
+        }
+
+        @keyframes highlightSweep {
+          0% {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+          50% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+        }
+
+        @keyframes sparkle1 {
+          0%, 100% {
+            opacity: 0;
+            transform: scale(0) rotate(0deg);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.2) rotate(180deg);
+          }
+        }
+
+        @keyframes sparkle2 {
+          0%, 100% {
+            opacity: 0;
+            transform: scale(0) rotate(0deg);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.5) rotate(-180deg);
+          }
+        }
+
+        @keyframes sparkle3 {
+          0%, 100% {
+            opacity: 0;
+            transform: scale(0) rotate(0deg);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.3) rotate(360deg);
+          }
+        }
+
+        @keyframes sparkle4 {
+          0%, 100% {
+            opacity: 0;
+            transform: scale(0) rotate(0deg);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.1) rotate(-360deg);
+          }
+        }
+
+        @keyframes glowRing {
+          0% {
+            transform: translate(-50%, -50%) rotate(0deg) scale(1);
+            opacity: 0.3;
+          }
+          50% {
+            transform: translate(-50%, -50%) rotate(180deg) scale(1.1);
+            opacity: 0.6;
+          }
+          100% {
+            transform: translate(-50%, -50%) rotate(360deg) scale(1);
+            opacity: 0.3;
+          }
+        }
+
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 0.3;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.8;
+            transform: scale(1.1);
+          }
+        }
+      `}</style>
     </div>
   );
 }
