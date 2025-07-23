@@ -64,10 +64,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       const handleMatched = (data: ChatRoomInfo) => {
         console.log('%c[AuthContext] ✨ Matched event received!', 'color: #28a745; font-weight: bold;', data);
+        console.log('[AuthContext] 📊 Current chatRoomInfo before update:', chatRoomInfo);
+        console.log('[AuthContext] 📊 Received data structure:', {
+          roomId: data.roomId,
+          users: data.users,
+          message: data.message,
+          usersCount: data.users?.length
+        });
+        
         // 이미 채팅방이 있는 경우, 새로운 매칭 무시
         if (!chatRoomInfo) {
           console.log('[AuthContext] 🚀 Setting new chat room info.');
           setChatRoomInfo(data);
+          console.log('[AuthContext] ✅ Chat room info updated successfully');
         } else {
           console.log('[AuthContext] ⚠️ Already in a chat room. Ignoring new match.');
         }
@@ -83,6 +92,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       socket.on('disconnect', handleDisconnect);
       socket.on('matched', handleMatched);
       console.log("[AuthContext] 🔌 3. Listeners for 'connect', 'disconnect', and 'matched' attached.");
+      console.log("[AuthContext] 🔌 4. Socket instance:", socket);
+      console.log("[AuthContext] 🔌 5. Socket connected:", socket.connected);
+      console.log("[AuthContext] 🔌 6. Socket ID:", socket.id);
 
       return () => {
         console.log(`[AuthContext] 🧹 Cleaning up listeners for user ${user.id}`);

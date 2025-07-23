@@ -137,8 +137,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           message: `'${tag}' 태그로 매칭되었습니다! 대화를 시작해보세요.`,
         };
 
+        console.log(`🚀 [ChatGateway] About to emit 'matched' event:`);
+        console.log(`   - Room ID: ${roomId}`);
+        console.log(`   - Payload:`, JSON.stringify(payload, null, 2));
+        console.log(`   - Socket A (${currentUser.nickname}): ${currentUserSocketId} -> Connected: ${socketA.connected}`);
+        console.log(`   - Socket B (${partnerUser.nickname}): ${partner.socketId} -> Connected: ${socketB.connected}`);
+        console.log(`   - Room members:`, Array.from(this.server.sockets.adapter.rooms.get(roomId) || []));
+
         this.server.to(roomId).emit('matched', payload);
-        console.log(`- Event 'matched' emitted to room ${roomId}.`);
+        console.log(`✅ [ChatGateway] Event 'matched' emitted to room ${roomId}.`);
       } else {
         console.error('- Critical error: Matched user socket not found. Re-queuing partner.');
         // 파트너를 다시 대기열에 추가
