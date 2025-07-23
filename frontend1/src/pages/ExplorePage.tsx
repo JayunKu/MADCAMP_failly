@@ -508,7 +508,7 @@ export default function ExplorePage() {
 
                   {/* 고양이 반응 버튼 */}
                   <div style={{
-                    padding: '16px',
+                    padding: '12px',
                     borderTop: '1px solid #f3f4f6',
                     background: '#fafafa'
                   }}>
@@ -516,7 +516,7 @@ export default function ExplorePage() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-around',
-                      gap: '12px'
+                      gap: '8px'
                     }}>
                       {/* 한잔해~ (drink!) */}
                       <button 
@@ -525,14 +525,14 @@ export default function ExplorePage() {
                           display: 'flex',
                           flexDirection: 'column',
                           alignItems: 'center',
-                          gap: '6px',
+                          gap: '4px',
                           background: post.userReaction === 'drink!' ? '#fef3c7' : 'transparent',
                           border: post.userReaction === 'drink!' ? '2px solid #f59e0b' : '2px solid transparent',
                           borderRadius: '12px',
-                          padding: '12px 16px',
+                          padding: '8px 12px',
                           cursor: 'pointer',
                           transition: 'all 0.2s ease',
-                          minWidth: '80px'
+                          minWidth: '70px'
                         }}
                         onMouseEnter={(e) => {
                           if (post.userReaction !== 'drink!') {
@@ -549,8 +549,8 @@ export default function ExplorePage() {
                           src="/assets/reaction/drink.png" 
                           alt="한잔해~" 
                           style={{
-                            width: '32px',
-                            height: '32px',
+                            width: '128px',
+                            height: '128px',
                             objectFit: 'contain'
                           }}
                         />
@@ -580,14 +580,14 @@ export default function ExplorePage() {
                           display: 'flex',
                           flexDirection: 'column',
                           alignItems: 'center',
-                          gap: '6px',
+                          gap: '4px',
                           background: post.userReaction === 'me too' ? '#dbeafe' : 'transparent',
                           border: post.userReaction === 'me too' ? '2px solid #3b82f6' : '2px solid transparent',
                           borderRadius: '12px',
-                          padding: '12px 16px',
+                          padding: '8px 12px',
                           cursor: 'pointer',
                           transition: 'all 0.2s ease',
-                          minWidth: '80px'
+                          minWidth: '70px'
                         }}
                         onMouseEnter={(e) => {
                           if (post.userReaction !== 'me too') {
@@ -604,8 +604,8 @@ export default function ExplorePage() {
                           src="/assets/reaction/metoo.png" 
                           alt="나도!" 
                           style={{
-                            width: '32px',
-                            height: '32px',
+                            width: '128px',
+                            height: '128px',
                             objectFit: 'contain'
                           }}
                         />
@@ -635,14 +635,14 @@ export default function ExplorePage() {
                           display: 'flex',
                           flexDirection: 'column',
                           alignItems: 'center',
-                          gap: '6px',
+                          gap: '4px',
                           background: post.userReaction === 'it\'s okay' ? '#dcfce7' : 'transparent',
                           border: post.userReaction === 'it\'s okay' ? '2px solid #22c55e' : '2px solid transparent',
                           borderRadius: '12px',
-                          padding: '12px 16px',
+                          padding: '8px 12px',
                           cursor: 'pointer',
                           transition: 'all 0.2s ease',
-                          minWidth: '80px'
+                          minWidth: '70px'
                         }}
                         onMouseEnter={(e) => {
                           if (post.userReaction !== 'it\'s okay') {
@@ -659,8 +659,8 @@ export default function ExplorePage() {
                           src="/assets/reaction/thatsok.png" 
                           alt="괜찮아" 
                           style={{
-                            width: '32px',
-                            height: '32px',
+                            width: '128px',
+                            height: '128px',
                             objectFit: 'contain'
                           }}
                         />
