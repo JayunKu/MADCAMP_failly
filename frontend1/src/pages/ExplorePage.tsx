@@ -92,17 +92,28 @@ export default function ExplorePage() {
 
   // 반응 토글
   const toggleReaction = async (postId: string, reactionType: 'drink!' | 'me too' | 'it\'s okay') => {
-    let delta = 1;
     try {
+      // 먼저 현재 상태를 확인하여 delta 값을 결정
+      const currentPost = posts.find(post => post.id === postId);
+      if (!currentPost) return;
+      
+      const currentUserReaction = currentPost.userReaction;
+      let delta = 1; // 기본값: 반응 추가
+      
+      // 이미 같은 반응을 눌렀다면 제거
+      if (currentUserReaction === reactionType) {
+        delta = -1;
+      }
+      
+      // 상태 업데이트
       setPosts(prev => prev.map(post => {
         if (post.id === postId) {
           const newReactions = { ...post.reactions };
           const currentUserReaction = post.userReaction;
           
-          // 이미 같은 반응을 눌렀다면 제거 (delta = -1)
+          // 이미 같은 반응을 눌렀다면 제거
           if (currentUserReaction === reactionType) {
             newReactions[reactionType] = Math.max(0, newReactions[reactionType] - 1);
-            delta = -1;
             return { ...post, reactions: newReactions, userReaction: null };
           }
           
@@ -111,9 +122,8 @@ export default function ExplorePage() {
             newReactions[currentUserReaction] = Math.max(0, newReactions[currentUserReaction] - 1);
           }
           
-          // 새 반응 추가 (delta = 1)
+          // 새 반응 추가
           newReactions[reactionType] = newReactions[reactionType] + 1;
-          delta = 1;
           return { ...post, reactions: newReactions, userReaction: reactionType };
         }
         return post;
