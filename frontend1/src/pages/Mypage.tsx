@@ -26,6 +26,8 @@ export default function MyPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [editingBadge, setEditingBadge] = useState<string | null>(null);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editedName, setEditedName] = useState('');
 
   // 사용자 정보 로드
   useEffect(() => {
@@ -39,6 +41,7 @@ export default function MyPage() {
         setError(null);
         const userData = await getUserInfo(user.id);
         setUserInfo(userData);
+        setEditedName(userData?.nickname || user?.nickname || '');
       } catch (err) {
         setError(err instanceof Error ? err.message : '사용자 정보를 불러오는데 실패했습니다.');
         console.error('Failed to load user info:', err);
@@ -49,6 +52,22 @@ export default function MyPage() {
 
     loadUserInfo();
   }, [isAuthenticated, user?.id]);
+
+  // 프로필 수정 핸들러
+  const handleProfileEdit = () => {
+    setIsEditingProfile(true);
+  };
+
+  const handleProfileSave = () => {
+    // TODO: API 호출로 사용자 이름 업데이트
+    console.log('Saving profile:', editedName);
+    setIsEditingProfile(false);
+  };
+
+  const handleProfileCancel = () => {
+    setEditedName(userInfo?.nickname || user?.nickname || '');
+    setIsEditingProfile(false);
+  };
 
   const addGuestbookEntry = () => {
     if (newMessage.trim()) {
@@ -353,18 +372,91 @@ export default function MyPage() {
               }}>
                 😊
               </div>
-              <div>
-                <h3 style={{
-                  fontSize: '18px',
-                  fontWeight: 'bold',
-                  color: '#1f2937',
-                  margin: 0
-                }}>내 프로필</h3>
-                <p style={{
-                  fontSize: '14px',
-                  color: '#6b7280',
-                  margin: 0
-                }}>프로필을 관리해요</p>
+              <div style={{ flex: 1 }}>
+                {isEditingProfile ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <input
+                      type="text"
+                      value={editedName}
+                      onChange={(e) => setEditedName(e.target.value)}
+                      style={{
+                        padding: '6px 8px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '6px',
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        outline: 'none'
+                      }}
+                      onFocus={(e) => {
+                        e.currentTarget.style.borderColor = '#1f2937';
+                        e.currentTarget.style.boxShadow = '0 0 0 2px rgba(31, 41, 55, 0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.borderColor = '#d1d5db';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    />
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      <button
+                        onClick={handleProfileSave}
+                        style={{
+                          padding: '4px 8px',
+                          background: '#1f2937',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        저장
+                      </button>
+                      <button
+                        onClick={handleProfileCancel}
+                        style={{
+                          padding: '4px 8px',
+                          background: '#6b7280',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        취소
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <h3 style={{
+                        fontSize: '18px',
+                        fontWeight: 'bold',
+                        color: '#1f2937',
+                        margin: 0
+                      }}>{userInfo?.nickname || user?.nickname || '사용자'}</h3>
+                      <button
+                        onClick={handleProfileEdit}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#6b7280',
+                          cursor: 'pointer',
+                          fontSize: '14px',
+                          padding: '2px'
+                        }}
+                      >
+                        ✏️
+                      </button>
+                    </div>
+                    <p style={{
+                      fontSize: '14px',
+                      color: '#6b7280',
+                      margin: 0
+                    }}>프로필을 관리해요</p>
+                  </div>
+                )}
               </div>
             </div>
             
@@ -375,7 +467,7 @@ export default function MyPage() {
             }}>
               <div style={{
                 display: 'flex',
-                justifyContent: 'space-between',
+                justifyContent: 'space-around',
                 marginBottom: '12px'
               }}>
                 <div style={{ textAlign: 'center' }}>
@@ -383,7 +475,7 @@ export default function MyPage() {
                     fontSize: '24px',
                     fontWeight: 'bold',
                     color: '#1f2937'
-                  }}>12</div>
+                  }}>{userInfo?.current_badges?.length || 0}</div>
                   <div style={{
                     fontSize: '12px',
                     color: '#6b7280',
@@ -395,19 +487,7 @@ export default function MyPage() {
                     fontSize: '24px',
                     fontWeight: 'bold',
                     color: '#1f2937'
-                  }}>48</div>
-                  <div style={{
-                    fontSize: '12px',
-                    color: '#6b7280',
-                    fontWeight: '500'
-                  }}>방문자 수</div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{
-                    fontSize: '24px',
-                    fontWeight: 'bold',
-                    color: '#1f2937'
-                  }}>156</div>
+                  }}>{userInfo?.failpost_count || 0}</div>
                   <div style={{
                     fontSize: '12px',
                     color: '#6b7280',
@@ -575,7 +655,7 @@ export default function MyPage() {
             </div>
           </div>
 
-          {/* 내가 획득한 상세룩 */}
+          {/* 내가 획득한 배지 태그 */}
           <div style={{
             background: 'white',
             borderRadius: '20px',
@@ -602,7 +682,7 @@ export default function MyPage() {
               <div style={{
                 width: '50px',
                 height: '50px',
-                background: 'linear-gradient(135deg, #dc2626, #ef4444)',
+                background: 'linear-gradient(135deg, #7c3aed, #a855f7)',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
@@ -610,9 +690,9 @@ export default function MyPage() {
                 color: 'white',
                 fontSize: '20px',
                 fontWeight: 'bold',
-                boxShadow: '0 4px 15px rgba(220, 38, 38, 0.3)'
+                boxShadow: '0 4px 15px rgba(124, 58, 237, 0.3)'
               }}>
-                ✨
+                🏷️
               </div>
               <div>
                 <h3 style={{
@@ -620,47 +700,123 @@ export default function MyPage() {
                   fontWeight: 'bold',
                   color: '#1f2937',
                   margin: 0
-                }}>내가 획득한 상세룩</h3>
+                }}>내가 획득한 배지 태그</h3>
                 <p style={{
                   fontSize: '14px',
                   color: '#6b7280',
                   margin: 0
-                }}>나만의 특별한 컬렉션</p>
+                }}>나의 실패 컬렉션</p>
               </div>
             </div>
             
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '8px'
+              background: '#f8fafc',
+              borderRadius: '12px',
+              padding: '16px',
+              maxHeight: '200px',
+              overflowY: 'auto'
             }}>
-              {[1,2,3,4,5,6].map(i => (
-                <div key={i} style={{
-                  aspectRatio: '1',
-                  background: '#f3f4f6',
-                  borderRadius: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '20px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  border: '1px solid #e5e7eb'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#e5e7eb';
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#f3f4f6';
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
-                >
-                  {i <= 3 ? '🏆' : '🔒'}
+              {loading ? (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '20px',
+                  color: '#6b7280'
+                }}>
+                  <div style={{ fontSize: '1.2rem', marginBottom: '8px' }}>⏳</div>
+                  <p style={{ fontSize: '14px', margin: 0 }}>태그 정보를 불러오는 중...</p>
                 </div>
-              ))}
+              ) : error ? (
+                <div style={{
+                  padding: '12px',
+                  background: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  borderRadius: '8px',
+                  color: '#dc2626',
+                  fontSize: '14px'
+                }}>
+                  태그 정보를 불러올 수 없습니다.
+                </div>
+              ) : userInfo?.current_badges && userInfo.current_badges.length > 0 ? (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px'
+                }}>
+                  {userInfo.current_badges.map((badge: any, index: number) => (
+                    <div key={index} style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      background: 'white',
+                      borderRadius: '8px',
+                      padding: '12px',
+                      border: '1px solid #e5e7eb',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#f3f4f6';
+                      e.currentTarget.style.transform = 'translateX(4px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'white';
+                      e.currentTarget.style.transform = 'translateX(0)';
+                    }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}>
+                        <span style={{
+                          fontSize: '16px',
+                          color: '#7c3aed'
+                        }}>⭐</span>
+                        <span style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#1f2937'
+                        }}>{badge.badge_name}</span>
+                      </div>
+                      <span style={{
+                        fontSize: '12px',
+                        color: '#6b7280',
+                        background: '#f3f4f6',
+                        padding: '4px 8px',
+                        borderRadius: '12px',
+                        fontWeight: '500'
+                      }}>#{badge.badge_tag}</span>
+                    </div>
+                  ))}
+                  
+                  {/* 총 개수 표시 */}
+                  <div style={{
+                    marginTop: '8px',
+                    padding: '8px',
+                    background: 'linear-gradient(135deg, #7c3aed, #a855f7)',
+                    borderRadius: '8px',
+                    textAlign: 'center'
+                  }}>
+                    <span style={{
+                      fontSize: '12px',
+                      color: 'white',
+                      fontWeight: '600'
+                    }}>총 {userInfo.current_badges.length}개의 배지를 획득했어요! 🎉</span>
+                  </div>
+                </div>
+              ) : (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '20px',
+                  color: '#6b7280'
+                }}>
+                  <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🏷️</div>
+                  <p style={{ fontSize: '14px', margin: 0, marginBottom: '4px' }}>아직 획득한 배지가 없어요!</p>
+                  <p style={{ fontSize: '12px', margin: 0, color: '#9ca3af' }}>게시물을 작성해서 배지를 모아보세요.</p>
+                </div>
+              )}
             </div>
           </div>
+
         </div>
 
         {/* 중앙 꾸밀 수 있는 공간 */}
