@@ -40,7 +40,7 @@ export default function ExplorePage() {
     { id: 'diet', name: '다이어트 실패', icon: '🍰' },
     { id: 'oversleep', name: '늦잠', icon: '😴' },
     { id: 'reality', name: '현타', icon: '😵' },
-    { id: 'overthinking', name: '오버씽킹', icon: '🤯' },
+    { id: 'overthinking', name: '지나친 걱정', icon: '🤯' },
     { id: 'cringe', name: '이불킥', icon: '🛏️' },
     { id: 'lazy', name: '게으름', icon: '🦥' },
     { id: 'burnout', name: '번아웃', icon: '🔥' },
