@@ -31,21 +31,336 @@ export default function ExplorePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 실패 카테고리 목록
+  // 실패 카테고리 목록 - CSS 아이콘으로 교체
   const failCategories = [
-    { id: 'late', name: '지각', icon: '⏰' },
-    { id: 'exam', name: '시험 망함', icon: '📝' },
-    { id: 'procrastination', name: '미룸', icon: '📅' },
-    { id: 'dating', name: '소개팅 망함', icon: '💔' },
-    { id: 'diet', name: '다이어트 실패', icon: '🍰' },
-    { id: 'oversleep', name: '늦잠', icon: '😴' },
-    { id: 'reality', name: '현타', icon: '😵' },
-    { id: 'overthinking', name: '지나친 걱정', icon: '🤯' },
-    { id: 'cringe', name: '이불킥', icon: '🛏️' },
-    { id: 'lazy', name: '게으름', icon: '🦥' },
-    { id: 'burnout', name: '번아웃', icon: '🔥' },
-    { id: 'smoking', name: '금연 실패', icon: '🚭' },
+    { id: 'late', name: '지각', icon: null, iconType: 'clock' },
+    { id: 'exam', name: '시험 망함', icon: null, iconType: 'document' },
+    { id: 'procrastination', name: '미룸', icon: null, iconType: 'calendar' },
+    { id: 'dating', name: '소개팅 망함', icon: null, iconType: 'heart' },
+    { id: 'diet', name: '다이어트 실패', icon: null, iconType: 'scale' },
+    { id: 'oversleep', name: '늦잠', icon: null, iconType: 'bed' },
+    { id: 'reality', name: '현타', icon: null, iconType: 'lightning' },
+    { id: 'overthinking', name: '지나친 걱정', icon: null, iconType: 'brain' },
+    { id: 'cringe', name: '이불킥', icon: null, iconType: 'pillow' },
+    { id: 'lazy', name: '게으름', icon: null, iconType: 'pause' },
+    { id: 'burnout', name: '번아웃', icon: null, iconType: 'fire' },
+    { id: 'smoking', name: '금연 실패', icon: null, iconType: 'no-smoking' },
   ];
+
+  // 아이콘 렌더링 함수
+  const renderIcon = (iconType: string, isSelected: boolean) => {
+    const iconColor = isSelected ? 'white' : '#6b7280';
+    const iconSize = '16px';
+    
+    switch (iconType) {
+      case 'clock':
+        return (
+          <div style={{
+            width: iconSize,
+            height: iconSize,
+            borderRadius: '50%',
+            border: `2px solid ${iconColor}`,
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <div style={{
+              position: 'absolute',
+              width: '6px',
+              height: '2px',
+              backgroundColor: iconColor,
+              transformOrigin: 'left center',
+              transform: 'rotate(90deg)'
+            }}></div>
+            <div style={{
+              position: 'absolute',
+              width: '4px',
+              height: '2px',
+              backgroundColor: iconColor,
+              transformOrigin: 'left center',
+              transform: 'rotate(0deg)'
+            }}></div>
+          </div>
+        );
+      case 'document':
+        return (
+          <div style={{
+            width: iconSize,
+            height: iconSize,
+            border: `2px solid ${iconColor}`,
+            borderRadius: '2px',
+            position: 'relative'
+          }}>
+            <div style={{
+              position: 'absolute',
+              top: '2px',
+              left: '2px',
+              right: '2px',
+              height: '2px',
+              backgroundColor: iconColor
+            }}></div>
+            <div style={{
+              position: 'absolute',
+              top: '6px',
+              left: '2px',
+              right: '2px',
+              height: '2px',
+              backgroundColor: iconColor
+            }}></div>
+          </div>
+        );
+      case 'calendar':
+        return (
+          <div style={{
+            width: iconSize,
+            height: iconSize,
+            border: `2px solid ${iconColor}`,
+            borderRadius: '2px',
+            position: 'relative'
+          }}>
+            <div style={{
+              position: 'absolute',
+              top: '-2px',
+              left: '3px',
+              width: '2px',
+              height: '4px',
+              backgroundColor: iconColor
+            }}></div>
+            <div style={{
+              position: 'absolute',
+              top: '-2px',
+              right: '3px',
+              width: '2px',
+              height: '4px',
+              backgroundColor: iconColor
+            }}></div>
+            <div style={{
+              position: 'absolute',
+              top: '4px',
+              left: '2px',
+              right: '2px',
+              height: '1px',
+              backgroundColor: iconColor
+            }}></div>
+          </div>
+        );
+      case 'heart':
+        return (
+          <div style={{
+            width: iconSize,
+            height: iconSize,
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <div style={{
+              width: '12px',
+              height: '12px',
+              border: `2px solid ${iconColor}`,
+              borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
+              transform: 'rotate(-45deg)'
+            }}></div>
+          </div>
+        );
+      case 'scale':
+        return (
+          <div style={{
+            width: iconSize,
+            height: iconSize,
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <div style={{
+              width: '12px',
+              height: '2px',
+              backgroundColor: iconColor,
+              position: 'relative'
+            }}>
+              <div style={{
+                position: 'absolute',
+                left: '0',
+                top: '-3px',
+                width: '4px',
+                height: '2px',
+                backgroundColor: iconColor
+              }}></div>
+              <div style={{
+                position: 'absolute',
+                right: '0',
+                top: '-3px',
+                width: '4px',
+                height: '2px',
+                backgroundColor: iconColor
+              }}></div>
+            </div>
+          </div>
+        );
+      case 'bed':
+        return (
+          <div style={{
+            width: iconSize,
+            height: iconSize,
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <div style={{
+              width: '12px',
+              height: '6px',
+              border: `2px solid ${iconColor}`,
+              borderRadius: '2px',
+              position: 'relative'
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: '-4px',
+                left: '2px',
+                width: '6px',
+                height: '4px',
+                backgroundColor: iconColor,
+                borderRadius: '2px'
+              }}></div>
+            </div>
+          </div>
+        );
+      case 'lightning':
+        return (
+          <div style={{
+            width: iconSize,
+            height: iconSize,
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <div style={{
+              width: '0',
+              height: '0',
+              borderLeft: `4px solid transparent`,
+              borderRight: `4px solid transparent`,
+              borderBottom: `8px solid ${iconColor}`,
+              transform: 'rotate(15deg)'
+            }}></div>
+          </div>
+        );
+      case 'brain':
+        return (
+          <div style={{
+            width: iconSize,
+            height: iconSize,
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <div style={{
+              width: '10px',
+              height: '10px',
+              border: `2px solid ${iconColor}`,
+              borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%'
+            }}></div>
+          </div>
+        );
+      case 'pillow':
+        return (
+          <div style={{
+            width: iconSize,
+            height: iconSize,
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <div style={{
+              width: '12px',
+              height: '8px',
+              border: `2px solid ${iconColor}`,
+              borderRadius: '4px'
+            }}></div>
+          </div>
+        );
+      case 'pause':
+        return (
+          <div style={{
+            width: iconSize,
+            height: iconSize,
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '2px'
+          }}>
+            <div style={{
+              width: '3px',
+              height: '10px',
+              backgroundColor: iconColor,
+              borderRadius: '1px'
+            }}></div>
+            <div style={{
+              width: '3px',
+              height: '10px',
+              backgroundColor: iconColor,
+              borderRadius: '1px'
+            }}></div>
+          </div>
+        );
+      case 'fire':
+        return (
+          <div style={{
+            width: iconSize,
+            height: iconSize,
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <div style={{
+              width: '8px',
+              height: '12px',
+              border: `2px solid ${iconColor}`,
+              borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
+              transform: 'rotate(15deg)'
+            }}></div>
+          </div>
+        );
+      case 'no-smoking':
+        return (
+          <div style={{
+            width: iconSize,
+            height: iconSize,
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <div style={{
+              width: '12px',
+              height: '12px',
+              borderRadius: '50%',
+              border: `2px solid ${iconColor}`,
+              position: 'relative'
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                width: '14px',
+                height: '2px',
+                backgroundColor: iconColor,
+                transform: 'translate(-50%, -50%) rotate(45deg)'
+              }}></div>
+            </div>
+          </div>
+        );
+      default:
+        return <span style={{ color: iconColor }}>●</span>;
+    }
+  };
 
   // 시간 포맷 함수
   const formatTime = (dateString: string) => {
@@ -371,7 +686,7 @@ export default function ExplorePage() {
                   }
                 }}
               >
-                <span>{category.icon}</span>
+                {renderIcon(category.iconType, selectedCategory === category.name)}
                 <span>{category.name}</span>
               </button>
             ))}
