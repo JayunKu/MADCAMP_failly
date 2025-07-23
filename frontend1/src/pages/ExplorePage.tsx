@@ -563,8 +563,8 @@ export default function ExplorePage() {
                             src="/assets/reaction/drink.png" 
                             alt="한잔해~" 
                             style={{
-                              width: '75px',
-                              height: '75px',
+                              width: '85px',
+                              height: '85px',
                               objectFit: 'cover',
                               filter: post.userReaction === 'drink!' ? 'brightness(1.1)' : 'none'
                             }}
@@ -639,8 +639,8 @@ export default function ExplorePage() {
                             src="/assets/reaction/metoo.png" 
                             alt="나도!" 
                             style={{
-                              width: '75px',
-                              height: '75px',
+                              width: '85px',
+                              height: '85px',
                               objectFit: 'cover',
                               filter: post.userReaction === 'me too' ? 'brightness(1.1)' : 'none'
                             }}
