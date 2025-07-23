@@ -508,7 +508,7 @@ export default function ExplorePage() {
 
                   {/* 고양이 반응 버튼 */}
                   <div style={{
-                    padding: '12px',
+                    padding: '8px',
                     borderTop: '1px solid #f3f4f6',
                     background: '#fafafa'
                   }}>
@@ -516,8 +516,8 @@ export default function ExplorePage() {
                       display: 'flex',
                       alignItems: 'flex-end',
                       justifyContent: 'space-around',
-                      gap: '8px',
-                      minHeight: '180px'
+                      gap: '6px',
+                      minHeight: '140px'
                     }}>
                       {/* 한잔해~ (drink!) */}
                       <button 
