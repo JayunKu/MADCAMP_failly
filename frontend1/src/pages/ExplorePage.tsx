@@ -508,62 +508,68 @@ export default function ExplorePage() {
 
                   {/* 고양이 반응 버튼 */}
                   <div style={{
-                    padding: '8px',
+                    padding: '16px',
                     borderTop: '1px solid #f3f4f6',
                     background: '#fafafa'
                   }}>
                     <div style={{
                       display: 'flex',
-                      alignItems: 'flex-end',
+                      alignItems: 'center',
                       justifyContent: 'space-around',
-                      gap: '6px',
-                      minHeight: '140px'
+                      gap: '12px'
                     }}>
                       {/* 한잔해~ (drink!) */}
-                      <button 
-                        onClick={() => toggleReaction(post.id, 'drink!')}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'flex-end',
-                          background: post.userReaction === 'drink!' ? '#fef3c7' : 'transparent',
-                          border: post.userReaction === 'drink!' ? '2px solid #f59e0b' : '2px solid transparent',
-                          borderRadius: '12px',
-                          padding: '8px 12px',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                          flex: 1,
-                          height: '100%'
-                        }}
-                        onMouseEnter={(e) => {
-                          if (post.userReaction !== 'drink!') {
-                            e.currentTarget.style.background = '#f3f4f6';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (post.userReaction !== 'drink!') {
-                            e.currentTarget.style.background = 'transparent';
-                          }
-                        }}
-                      >
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          height: '128px',
-                          marginBottom: '8px'
-                        }}>
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}>
+                        <button 
+                          onClick={() => toggleReaction(post.id, 'drink!')}
+                          style={{
+                            width: '80px',
+                            height: '80px',
+                            borderRadius: '50%',
+                            background: post.userReaction === 'drink!' 
+                              ? 'linear-gradient(135deg, #fef3c7, #fde68a)' 
+                              : 'linear-gradient(135deg, #ffffff, #f9fafb)',
+                            border: post.userReaction === 'drink!' ? '3px solid #f59e0b' : '3px solid #e5e7eb',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: post.userReaction === 'drink!' 
+                              ? '0 8px 25px rgba(245, 158, 11, 0.3)' 
+                              : '0 4px 15px rgba(0, 0, 0, 0.1)',
+                            position: 'relative',
+                            overflow: 'hidden'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.1)';
+                            e.currentTarget.style.boxShadow = post.userReaction === 'drink!' 
+                              ? '0 12px 35px rgba(245, 158, 11, 0.4)' 
+                              : '0 8px 25px rgba(0, 0, 0, 0.15)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                            e.currentTarget.style.boxShadow = post.userReaction === 'drink!' 
+                              ? '0 8px 25px rgba(245, 158, 11, 0.3)' 
+                              : '0 4px 15px rgba(0, 0, 0, 0.1)';
+                          }}
+                        >
                           <img 
                             src="/assets/reaction/drink.png" 
                             alt="한잔해~" 
                             style={{
-                              width: '128px',
-                              height: '128px',
-                              objectFit: 'contain'
+                              width: '50px',
+                              height: '50px',
+                              objectFit: 'contain',
+                              filter: post.userReaction === 'drink!' ? 'brightness(1.1)' : 'none'
                             }}
                           />
-                        </div>
+                        </button>
                         <div style={{
                           display: 'flex',
                           flexDirection: 'column',
@@ -573,61 +579,73 @@ export default function ExplorePage() {
                           <span style={{
                             fontSize: '11px',
                             fontWeight: '600',
-                            color: '#6b7280'
+                            color: post.userReaction === 'drink!' ? '#f59e0b' : '#6b7280'
                           }}>한잔해~</span>
                           <span style={{
-                            fontSize: '12px',
+                            fontSize: '14px',
                             fontWeight: 'bold',
-                            color: post.userReaction === 'drink!' ? '#f59e0b' : '#9ca3af'
+                            color: post.userReaction === 'drink!' ? '#f59e0b' : '#9ca3af',
+                            background: post.userReaction === 'drink!' ? '#fef3c7' : '#f3f4f6',
+                            padding: '2px 8px',
+                            borderRadius: '12px',
+                            minWidth: '24px',
+                            textAlign: 'center'
                           }}>{post.reactions['drink!']}</span>
                         </div>
-                      </button>
+                      </div>
 
                       {/* 나도! (me too) */}
-                      <button 
-                        onClick={() => toggleReaction(post.id, 'me too')}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'flex-end',
-                          background: post.userReaction === 'me too' ? '#dbeafe' : 'transparent',
-                          border: post.userReaction === 'me too' ? '2px solid #3b82f6' : '2px solid transparent',
-                          borderRadius: '12px',
-                          padding: '8px 12px',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                          flex: 1,
-                          height: '100%'
-                        }}
-                        onMouseEnter={(e) => {
-                          if (post.userReaction !== 'me too') {
-                            e.currentTarget.style.background = '#f3f4f6';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (post.userReaction !== 'me too') {
-                            e.currentTarget.style.background = 'transparent';
-                          }
-                        }}
-                      >
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          height: '128px',
-                          marginBottom: '8px'
-                        }}>
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}>
+                        <button 
+                          onClick={() => toggleReaction(post.id, 'me too')}
+                          style={{
+                            width: '80px',
+                            height: '80px',
+                            borderRadius: '50%',
+                            background: post.userReaction === 'me too' 
+                              ? 'linear-gradient(135deg, #dbeafe, #bfdbfe)' 
+                              : 'linear-gradient(135deg, #ffffff, #f9fafb)',
+                            border: post.userReaction === 'me too' ? '3px solid #3b82f6' : '3px solid #e5e7eb',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: post.userReaction === 'me too' 
+                              ? '0 8px 25px rgba(59, 130, 246, 0.3)' 
+                              : '0 4px 15px rgba(0, 0, 0, 0.1)',
+                            position: 'relative',
+                            overflow: 'hidden'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.1)';
+                            e.currentTarget.style.boxShadow = post.userReaction === 'me too' 
+                              ? '0 12px 35px rgba(59, 130, 246, 0.4)' 
+                              : '0 8px 25px rgba(0, 0, 0, 0.15)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                            e.currentTarget.style.boxShadow = post.userReaction === 'me too' 
+                              ? '0 8px 25px rgba(59, 130, 246, 0.3)' 
+                              : '0 4px 15px rgba(0, 0, 0, 0.1)';
+                          }}
+                        >
                           <img 
                             src="/assets/reaction/metoo.png" 
                             alt="나도!" 
                             style={{
-                              width: '128px',
-                              height: '128px',
-                              objectFit: 'contain'
+                              width: '50px',
+                              height: '50px',
+                              objectFit: 'contain',
+                              filter: post.userReaction === 'me too' ? 'brightness(1.1)' : 'none'
                             }}
                           />
-                        </div>
+                        </button>
                         <div style={{
                           display: 'flex',
                           flexDirection: 'column',
@@ -637,61 +655,73 @@ export default function ExplorePage() {
                           <span style={{
                             fontSize: '11px',
                             fontWeight: '600',
-                            color: '#6b7280'
+                            color: post.userReaction === 'me too' ? '#3b82f6' : '#6b7280'
                           }}>나도!</span>
                           <span style={{
-                            fontSize: '12px',
+                            fontSize: '14px',
                             fontWeight: 'bold',
-                            color: post.userReaction === 'me too' ? '#3b82f6' : '#9ca3af'
+                            color: post.userReaction === 'me too' ? '#3b82f6' : '#9ca3af',
+                            background: post.userReaction === 'me too' ? '#dbeafe' : '#f3f4f6',
+                            padding: '2px 8px',
+                            borderRadius: '12px',
+                            minWidth: '24px',
+                            textAlign: 'center'
                           }}>{post.reactions['me too']}</span>
                         </div>
-                      </button>
+                      </div>
 
                       {/* 괜찮아 (it's okay) */}
-                      <button 
-                        onClick={() => toggleReaction(post.id, 'it\'s okay')}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'flex-end',
-                          background: post.userReaction === 'it\'s okay' ? '#dcfce7' : 'transparent',
-                          border: post.userReaction === 'it\'s okay' ? '2px solid #22c55e' : '2px solid transparent',
-                          borderRadius: '12px',
-                          padding: '8px 12px',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                          flex: 1,
-                          height: '100%'
-                        }}
-                        onMouseEnter={(e) => {
-                          if (post.userReaction !== 'it\'s okay') {
-                            e.currentTarget.style.background = '#f3f4f6';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (post.userReaction !== 'it\'s okay') {
-                            e.currentTarget.style.background = 'transparent';
-                          }
-                        }}
-                      >
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          height: '128px',
-                          marginBottom: '8px'
-                        }}>
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}>
+                        <button 
+                          onClick={() => toggleReaction(post.id, 'it\'s okay')}
+                          style={{
+                            width: '80px',
+                            height: '80px',
+                            borderRadius: '50%',
+                            background: post.userReaction === 'it\'s okay' 
+                              ? 'linear-gradient(135deg, #dcfce7, #bbf7d0)' 
+                              : 'linear-gradient(135deg, #ffffff, #f9fafb)',
+                            border: post.userReaction === 'it\'s okay' ? '3px solid #22c55e' : '3px solid #e5e7eb',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: post.userReaction === 'it\'s okay' 
+                              ? '0 8px 25px rgba(34, 197, 94, 0.3)' 
+                              : '0 4px 15px rgba(0, 0, 0, 0.1)',
+                            position: 'relative',
+                            overflow: 'hidden'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.1)';
+                            e.currentTarget.style.boxShadow = post.userReaction === 'it\'s okay' 
+                              ? '0 12px 35px rgba(34, 197, 94, 0.4)' 
+                              : '0 8px 25px rgba(0, 0, 0, 0.15)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                            e.currentTarget.style.boxShadow = post.userReaction === 'it\'s okay' 
+                              ? '0 8px 25px rgba(34, 197, 94, 0.3)' 
+                              : '0 4px 15px rgba(0, 0, 0, 0.1)';
+                          }}
+                        >
                           <img 
                             src="/assets/reaction/thatsok.png" 
                             alt="괜찮아" 
                             style={{
-                              width: '64px',
-                              height: '64px',
-                              objectFit: 'contain'
+                              width: '40px',
+                              height: '40px',
+                              objectFit: 'contain',
+                              filter: post.userReaction === 'it\'s okay' ? 'brightness(1.1)' : 'none'
                             }}
                           />
-                        </div>
+                        </button>
                         <div style={{
                           display: 'flex',
                           flexDirection: 'column',
@@ -701,15 +731,20 @@ export default function ExplorePage() {
                           <span style={{
                             fontSize: '11px',
                             fontWeight: '600',
-                            color: '#6b7280'
+                            color: post.userReaction === 'it\'s okay' ? '#22c55e' : '#6b7280'
                           }}>괜찮아</span>
                           <span style={{
-                            fontSize: '12px',
+                            fontSize: '14px',
                             fontWeight: 'bold',
-                            color: post.userReaction === 'it\'s okay' ? '#22c55e' : '#9ca3af'
+                            color: post.userReaction === 'it\'s okay' ? '#22c55e' : '#9ca3af',
+                            background: post.userReaction === 'it\'s okay' ? '#dcfce7' : '#f3f4f6',
+                            padding: '2px 8px',
+                            borderRadius: '12px',
+                            minWidth: '24px',
+                            textAlign: 'center'
                           }}>{post.reactions['it\'s okay']}</span>
                         </div>
-                      </button>
+                      </div>
                     </div>
                   </div>
 
