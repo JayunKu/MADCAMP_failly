@@ -914,9 +914,13 @@ export default function ExplorePage() {
           /* 인스타그램 스타일 그리드 레이아웃 */
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+            gridTemplateColumns: posts.length === 1 
+              ? '1fr' 
+              : 'repeat(auto-fit, minmax(350px, 1fr))',
             gap: '24px',
-            alignItems: 'start'
+            alignItems: 'start',
+            maxWidth: posts.length === 1 ? '500px' : 'none',
+            margin: posts.length === 1 ? '0 auto' : '0'
           }}>
             {posts.length > 0 ? (
               posts.map(post => (
