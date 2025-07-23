@@ -659,8 +659,8 @@ export default function ExplorePage() {
                           src="/assets/reaction/thatsok.png" 
                           alt="괜찮아" 
                           style={{
-                            width: '128px',
-                            height: '128px',
+                            width: '64px',
+                            height: '64px',
                             objectFit: 'contain'
                           }}
                         />
