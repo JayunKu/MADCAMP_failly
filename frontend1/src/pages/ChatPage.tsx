@@ -27,6 +27,15 @@ export default function ChatPage() {
   // 채팅 상대 유저를 chatRoomInfo로부터 실시간 계산
   const opponent = chatRoomInfo?.users.find(u => u.userId !== userId);
 
+  // 디버깅을 위한 로그
+  console.log('=== ChatPage Debug Info ===');
+  console.log('userId:', userId);
+  console.log('chatRoomInfo:', chatRoomInfo);
+  console.log('opponent:', opponent);
+  console.log('chatRoomInfo exists:', !!chatRoomInfo);
+  console.log('opponent exists:', !!opponent);
+  console.log('Input should be enabled:', !!(chatRoomInfo && opponent));
+
   // 페이지 떠날 때 알림 제거
   useEffect(() => {
     return () => {
@@ -480,17 +489,18 @@ export default function ChatPage() {
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                    placeholder={chatRoomInfo ? "메시지를 입력하세요..." : "상대방을 기다리는 중..."}
-                    disabled={!chatRoomInfo}
+                    placeholder={chatRoomInfo && opponent ? "메시지를 입력하세요..." : "매칭 대기 중입니다..."}
+                    disabled={!chatRoomInfo || !opponent}
                     style={{
                       width: '100%',
                     padding: '12px 16px',
-                    background: '#f9fafb',
+                    background: (!chatRoomInfo || !opponent) ? '#f3f4f6' : '#f9fafb',
                     border: '1px solid #d1d5db',
                     borderRadius: '20px',
                     fontSize: '14px',
                     outline: 'none',
-                    transition: 'all 0.2s ease'
+                    transition: 'all 0.2s ease',
+                    opacity: (!chatRoomInfo || !opponent) ? 0.6 : 1
                   }}
                   onFocus={(e) => {
                     e.currentTarget.style.borderColor = '#6b7280';
@@ -529,32 +539,32 @@ export default function ChatPage() {
               
               <button
                 onClick={handleSendMessage}
-                disabled={!newMessage.trim() || !chatRoomInfo}
+                disabled={!newMessage.trim() || !chatRoomInfo || !opponent}
                 style={{
                   width: '36px',
                   height: '36px',
                   borderRadius: '50%',
                   border: 'none',
-                  cursor: (newMessage.trim() && chatRoomInfo) ? 'pointer' : 'not-allowed',
+                  cursor: (newMessage.trim() && chatRoomInfo && opponent) ? 'pointer' : 'not-allowed',
                   fontSize: '16px',
                   color: 'white',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   transition: 'all 0.2s ease',
-                  background: (newMessage.trim() && chatRoomInfo)
+                  background: (newMessage.trim() && chatRoomInfo && opponent)
                     ? 'linear-gradient(135deg, #1f2937, #374151)' 
                     : '#9ca3af',
-                  boxShadow: (newMessage.trim() && chatRoomInfo) ? '0 4px 12px rgba(31, 41, 55, 0.3)' : 'none'
+                  boxShadow: (newMessage.trim() && chatRoomInfo && opponent) ? '0 4px 12px rgba(31, 41, 55, 0.3)' : 'none'
                 }}
                 onMouseEnter={(e) => {
-                  if (newMessage.trim() && chatRoomInfo) {
+                  if (newMessage.trim() && chatRoomInfo && opponent) {
                     e.currentTarget.style.background = 'linear-gradient(135deg, #111827, #1f2937)';
                     e.currentTarget.style.transform = 'scale(1.05)';
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (newMessage.trim() && chatRoomInfo) {
+                  if (newMessage.trim() && chatRoomInfo && opponent) {
                     e.currentTarget.style.background = 'linear-gradient(135deg, #1f2937, #374151)';
                     e.currentTarget.style.transform = 'scale(1)';
                   }
