@@ -725,38 +725,128 @@ export default function ExplorePage() {
 
       {/* 메인 피드 */}
       <div style={{
-        maxWidth: '600px',
+        maxWidth: '1200px',
         margin: '0 auto',
         padding: '24px 16px'
       }}>
         {loading && posts.length === 0 ? (
           <div style={{
             textAlign: 'center',
-            padding: '64px 0',
+            padding: '80px 0',
             color: '#6b7280'
           }}>
-            <div style={{ fontSize: '2rem', marginBottom: '16px' }}>⏳</div>
-            <p>게시물을 불러오는 중...</p>
+            {/* 커스텀 로딩 스피너 */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginBottom: '32px'
+            }}>
+              <div style={{
+                width: '80px',
+                height: '80px',
+                position: 'relative',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                {/* 외부 원 */}
+                <div style={{
+                  position: 'absolute',
+                  width: '80px',
+                  height: '80px',
+                  border: '4px solid #e5e7eb',
+                  borderTop: '4px solid #1f2937',
+                  borderRadius: '50%',
+                  animation: 'spin 1.5s linear infinite'
+                }}></div>
+                
+                {/* 내부 원 */}
+                <div style={{
+                  position: 'absolute',
+                  width: '50px',
+                  height: '50px',
+                  border: '3px solid #f3f4f6',
+                  borderBottom: '3px solid #6b7280',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite reverse'
+                }}></div>
+                
+                {/* 중앙 점 */}
+                <div style={{
+                  width: '12px',
+                  height: '12px',
+                  background: '#1f2937',
+                  borderRadius: '50%',
+                  animation: 'pulse 2s ease-in-out infinite'
+                }}></div>
+              </div>
+            </div>
+            
+            <h3 style={{
+              fontSize: '1.5rem',
+              fontWeight: '600',
+              color: '#374151',
+              marginBottom: '12px',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif'
+            }}>
+              게시물을 불러오는 중
+            </h3>
+            <p style={{
+              fontSize: '16px',
+              color: '#9ca3af',
+              fontWeight: '500'
+            }}>
+              잠시만 기다려주세요...
+            </p>
+            
+            {/* CSS 애니메이션 정의 */}
+            <style>{`
+              @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+              
+              @keyframes pulse {
+                0%, 100% { 
+                  opacity: 1;
+                  transform: scale(1);
+                }
+                50% { 
+                  opacity: 0.5;
+                  transform: scale(0.8);
+                }
+              }
+            `}</style>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          /* 인스타그램 스타일 그리드 레이아웃 */
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+            gap: '24px',
+            alignItems: 'start'
+          }}>
             {posts.length > 0 ? (
               posts.map(post => (
                 <div key={post.id} style={{
                   background: 'white',
-                  borderRadius: '20px',
-                  boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-                  border: '1px solid #e5e7eb',
+                  borderRadius: '24px',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+                  border: '1px solid #f1f5f9',
                   overflow: 'hidden',
-                  transition: 'all 0.3s ease'
+                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  position: 'relative'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.15)';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 20px 60px rgba(0,0,0,0.12)';
+                  e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
+                  e.currentTarget.style.borderColor = '#e2e8f0';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
-                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.08)';
+                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                  e.currentTarget.style.borderColor = '#f1f5f9';
                 }}
                 >
                 
@@ -1078,21 +1168,112 @@ export default function ExplorePage() {
             ) : (
               <div style={{
                 textAlign: 'center',
-                padding: '64px 0'
+                padding: '80px 0'
               }}>
-                <div style={{ fontSize: '4rem', marginBottom: '16px' }}>📝</div>
-                <h3 style={{
-                  fontSize: '1.25rem',
-                  fontWeight: '600',
-                  color: '#6b7280',
-                  marginBottom: '8px'
+                {/* 깔끔한 빈 상태 아이콘 */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginBottom: '32px'
                 }}>
-                  {selectedCategory} 카테고리에 게시물이 없어요
+                  <div style={{
+                    width: '120px',
+                    height: '120px',
+                    background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '3px solid #e2e8f0',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
+                    position: 'relative'
+                  }}>
+                    {/* 문서 아이콘 */}
+                    <div style={{
+                      width: '50px',
+                      height: '60px',
+                      background: '#ffffff',
+                      borderRadius: '6px',
+                      border: '2px solid #cbd5e1',
+                      position: 'relative',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '4px'
+                    }}>
+                      {/* 문서 라인들 */}
+                      <div style={{
+                        width: '30px',
+                        height: '2px',
+                        background: '#e2e8f0',
+                        borderRadius: '1px'
+                      }}></div>
+                      <div style={{
+                        width: '24px',
+                        height: '2px',
+                        background: '#e2e8f0',
+                        borderRadius: '1px'
+                      }}></div>
+                      <div style={{
+                        width: '28px',
+                        height: '2px',
+                        background: '#e2e8f0',
+                        borderRadius: '1px'
+                      }}></div>
+                      
+                      {/* 플러스 아이콘 */}
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '-8px',
+                        right: '-8px',
+                        width: '20px',
+                        height: '20px',
+                        background: '#1f2937',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 2px 8px rgba(31, 41, 55, 0.3)'
+                      }}>
+                        <div style={{
+                          width: '10px',
+                          height: '2px',
+                          background: 'white',
+                          borderRadius: '1px',
+                          position: 'relative'
+                        }}>
+                          <div style={{
+                            position: 'absolute',
+                            top: '-4px',
+                            left: '4px',
+                            width: '2px',
+                            height: '10px',
+                            background: 'white',
+                            borderRadius: '1px'
+                          }}></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <h3 style={{
+                  fontSize: '1.5rem',
+                  fontWeight: '600',
+                  color: '#374151',
+                  marginBottom: '12px',
+                  fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif'
+                }}>
+                  {selectedCategory} 카테고리가 비어있어요
                 </h3>
                 <p style={{
+                  fontSize: '16px',
                   color: '#9ca3af',
-                  marginBottom: '24px'
-                }}>첫 번째 게시물을 작성해보세요!</p>
+                  marginBottom: '32px',
+                  fontWeight: '500'
+                }}>첫 번째 게시물로 이야기를 시작해보세요</p>
                 <button
                   onClick={() => setShowWriteModal(true)}
                   style={{
