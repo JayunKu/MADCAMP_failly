@@ -63,7 +63,7 @@ export class FailpostsService {
     });
 
     // 6. ChatGateway를 통해 매칭 로직 실행
-    this.chatGateway.tryMatchUser(user_id, tag);
+    this.chatGateway.tryMatchUser(user_id);
 
     return {
       message: 'success',

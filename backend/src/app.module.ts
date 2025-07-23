@@ -19,6 +19,7 @@ import { ChatGateway } from './chat/chat.gateway';
     FailpostsModule,
     AuthModule,
     UsersModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -9,6 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
+import { PrismaService } from 'src/prisma/prisma.service'; // PrismaService import
 
 interface WaitingUser {
   userId: string;
@@ -21,6 +22,8 @@ interface WaitingUser {
   },
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  constructor(private prisma: PrismaService) {} // PrismaService 주입
+
   @WebSocketServer()
   server: Server;
 
@@ -77,65 +80,82 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
    * FailpostsService에서 호출되는 메서드
    * 사용자를 대기열에 추가하고 매칭을 시도합니다.
    */
-  public tryMatchUser(userId: string, tag: string) {
-    console.log(`- Matching attempt for user ${userId} with tag #${tag}`);
-    const socketId = this.connectedUsers.get(userId);
+  public async tryMatchUser(userId: string) {
+    // 1. DB에서 사용자의 최신 정보 조회
+    const currentUser = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!currentUser || !currentUser.current_tag) {
+      console.log(`- Matching attempt failed: User ${userId} has no current_tag.`);
+      return;
+    }
+    const tag = currentUser.current_tag;
+    console.log(`- Matching attempt for user ${currentUser.nickname} (${userId}) with tag #${tag}`);
 
-    if (!socketId) {
+    // 2. 현재 사용자의 소켓 연결 확인
+    const currentUserSocketId = this.connectedUsers.get(userId);
+    if (!currentUserSocketId) {
       console.log(`- Matching attempt failed: User ${userId} is not connected.`);
       return;
     }
 
+    // 3. 대기열에서 매칭 상대 찾기
     const waitingList = this.waitingUsers.get(tag) || [];
+    const partnerIndex = waitingList.findIndex(p => p.userId !== userId);
 
-    // 이미 대기열에 있는지 확인 (중복 추가 방지)
-    if (waitingList.some((user) => user.userId === userId)) {
-      console.log(
-        `- User ${userId} is already in the waiting queue for tag #${tag}.`,
-      );
-      return;
-    }
+    if (partnerIndex !== -1) {
+      // 4. 매칭 성공
+      const partner = waitingList[partnerIndex];
+      const partnerUser = await this.prisma.user.findUnique({ where: { id: partner.userId } });
 
-    waitingList.push({ userId, socketId });
-    this.waitingUsers.set(tag, waitingList);
+      if (!partnerUser) {
+        console.error(`- Critical error: Partner user ${partner.userId} not found in DB.`);
+        // 문제가 있는 파트너는 대기열에서 제거하고 현재 유저는 대기열에 추가
+        this.waitingUsers.set(tag, waitingList.filter((_, i) => i !== partnerIndex));
+        this.tryMatchUser(userId); // 현재 유저로 다시 시도 (다른 파트너 찾기)
+        return;
+      }
+      
+      console.log(`- Match found for tag #${tag}! -> ${currentUser.nickname} & ${partnerUser.nickname}`);
+      
+      // 대기열에서 파트너 제거
+      waitingList.splice(partnerIndex, 1);
+      this.waitingUsers.set(tag, waitingList);
 
-    console.log(
-      `- User ${userId} added to waiting queue for tag #${tag}. Queue size: ${waitingList.length}`,
-    );
+      const roomId = uuidv4();
+      const socketA = this.server.sockets.sockets.get(currentUserSocketId);
+      const socketB = this.server.sockets.sockets.get(partner.socketId);
 
-    if (waitingList.length >= 2) {
-      console.log(`- Match found for tag #${tag}!`);
+      if (socketA && socketB) {
+        socketA.join(roomId);
+        socketB.join(roomId);
 
-      const userA = waitingList.shift();
-      const userB = waitingList.shift();
+        const payload = {
+          roomId: roomId,
+          users: [
+            { userId: currentUser.id, nickname: currentUser.nickname },
+            { userId: partnerUser.id, nickname: partnerUser.nickname }
+          ],
+          message: `'${tag}' 태그로 매칭되었습니다! 대화를 시작해보세요.`,
+        };
 
-      // 타입스크립트 오류 방지를 위해 userA와 userB가 존재하는지 확인
-      if (userA && userB) {
+        this.server.to(roomId).emit('matched', payload);
+        console.log(`- Event 'matched' emitted to room ${roomId}.`);
+      } else {
+        console.error('- Critical error: Matched user socket not found. Re-queuing partner.');
+        // 파트너를 다시 대기열에 추가
+        this.waitingUsers.set(tag, [...waitingList, partner]);
+      }
+    } else {
+      // 5. 매칭 실패 -> 대기열에 추가
+      if (!waitingList.some((u) => u.userId === userId)) {
+        waitingList.push({ userId, socketId: currentUserSocketId });
         this.waitingUsers.set(tag, waitingList);
-
-        const roomId = uuidv4();
-        const socketA = this.server.sockets.sockets.get(userA.socketId);
-        const socketB = this.server.sockets.sockets.get(userB.socketId);
-
-        if (socketA && socketB) {
-          socketA.join(roomId);
-          socketB.join(roomId);
-
-          this.server.to(roomId).emit('matched', {
-            roomId: roomId,
-            users: [{ userId: userA.userId }, { userId: userB.userId }],
-            message: `매칭이 성사되었습니다! '${tag}'에 대한 대화를 시작해보세요.`,
-          });
-          console.log(
-            `- Room ${roomId} created for ${userA.userId} and ${userB.userId}`,
-          );
-        } else {
-          console.error('- Critical error: Matched user socket not found.');
-          // 예외 처리: 매칭 실패한 사용자들을 다시 대기열 앞으로 추가
-          waitingList.unshift(userB);
-          waitingList.unshift(userA);
-          this.waitingUsers.set(tag, waitingList);
-        }
+        console.log(
+          `- User ${currentUser.nickname} added to waiting queue for tag #${tag}. Queue size: ${waitingList.length}`,
+        );
+      } else {
+        console.log(
+          `- User ${currentUser.nickname} is already in the waiting queue for tag #${tag}.`,
+        );
       }
     }
   }
