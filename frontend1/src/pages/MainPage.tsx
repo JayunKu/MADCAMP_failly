@@ -219,13 +219,19 @@ export default function MainPage() {
         {/* 더 크고 예쁜 failly 로고 */}
         <div style={{ marginBottom: '48px' }}>
           <h1 style={{
-            fontSize: '6rem',
-            fontWeight: '900',
+            fontSize: '7rem',
+            fontWeight: '300',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", "Arial", sans-serif',
             marginBottom: '20px',
             color: '#1e293b',
-            textShadow: '0 4px 8px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.1)',
-            letterSpacing: '-0.02em',
-            position: 'relative'
+            textShadow: '0 8px 32px rgba(30, 41, 59, 0.3), 0 4px 16px rgba(30, 41, 59, 0.2), 0 2px 8px rgba(30, 41, 59, 0.1)',
+            letterSpacing: '-0.05em',
+            position: 'relative',
+            background: 'linear-gradient(135deg, #1e293b 0%, #334155 25%, #475569 50%, #64748b 75%, #94a3b8 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            filter: 'drop-shadow(0 4px 8px rgba(30, 41, 59, 0.15))'
           }}>
             <span style={{
               position: 'relative',
