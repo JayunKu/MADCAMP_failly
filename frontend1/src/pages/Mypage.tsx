@@ -25,6 +25,7 @@ export default function MyPage() {
   }>>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [editingBadge, setEditingBadge] = useState<string | null>(null);
 
   // 사용자 정보 로드
   useEffect(() => {
@@ -111,6 +112,65 @@ export default function MyPage() {
   // 배치된 배지 제거
   const removePlacedBadge = (id: string) => {
     setPlacedBadges(prev => prev.filter(badge => badge.id !== id));
+  };
+
+  // 배치된 배지 편집 시작
+  const handleEditBadge = (e: React.MouseEvent, badgeId: string) => {
+    e.stopPropagation();
+    const badge = placedBadges.find(b => b.id === badgeId);
+    if (badge) {
+      setEditingBadge(badgeId);
+      setSelectedBadge(badge.badge);
+      setIsDragging(true);
+      
+      const rect = e.currentTarget.getBoundingClientRect();
+      setDragOffset({
+        x: rect.width / 2,
+        y: rect.height / 2
+      });
+    }
+  };
+
+  // 편집 중인 배지 위치 업데이트
+  const handleEditDrop = (e: React.MouseEvent) => {
+    if (isDragging && editingBadge) {
+      const centerArea = e.currentTarget.getBoundingClientRect();
+      const x = ((e.clientX - centerArea.left - dragOffset.x) / centerArea.width) * 100;
+      const y = ((e.clientY - centerArea.top - dragOffset.y) / centerArea.height) * 100;
+      
+      // 경계 체크
+      if (x >= 0 && x <= 95 && y >= 0 && y <= 95) {
+        setPlacedBadges(prev => prev.map(badge => 
+          badge.id === editingBadge 
+            ? { ...badge, x: Math.max(0, Math.min(95, x)), y: Math.max(0, Math.min(95, y)) }
+            : badge
+        ));
+      }
+      
+      setIsDragging(false);
+      setSelectedBadge(null);
+      setEditingBadge(null);
+    } else if (isDragging && selectedBadge) {
+      // 기존 드롭 로직
+      const centerArea = e.currentTarget.getBoundingClientRect();
+      const x = ((e.clientX - centerArea.left - dragOffset.x) / centerArea.width) * 100;
+      const y = ((e.clientY - centerArea.top - dragOffset.y) / centerArea.height) * 100;
+      
+      // 경계 체크
+      if (x >= 0 && x <= 95 && y >= 0 && y <= 95) {
+        const newPlacedBadge = {
+          badge: selectedBadge,
+          x: Math.max(0, Math.min(95, x)),
+          y: Math.max(0, Math.min(95, y)),
+          id: `${selectedBadge.badge_name}-${Date.now()}`
+        };
+        
+        setPlacedBadges(prev => [...prev, newPlacedBadge]);
+      }
+      
+      setIsDragging(false);
+      setSelectedBadge(null);
+    }
   };
 
   return (
@@ -616,7 +676,7 @@ export default function MyPage() {
             cursor: isDragging ? 'copy' : 'default'
           }}
           onMouseMove={handleMouseMove}
-          onMouseUp={handleDrop}
+          onMouseUp={handleEditDrop}
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDrop}
         >
@@ -674,7 +734,7 @@ export default function MyPage() {
                 cursor: 'pointer',
                 transition: 'all 0.2s ease'
               }}
-              onClick={() => removePlacedBadge(placedBadge.id)}
+              onClick={(e) => handleEditBadge(e, placedBadge.id)}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'scale(1.1)';
                 e.currentTarget.style.zIndex = '6';
@@ -687,13 +747,13 @@ export default function MyPage() {
               <div style={{
                 width: '100%',
                 height: '100%',
-                background: 'linear-gradient(135deg, #f59e0b, #fbbf24)',
+                background: 'white',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 8px 20px rgba(245, 158, 11, 0.4)',
-                border: '3px solid white',
+                boxShadow: '0 8px 20px rgba(0, 0, 0, 0.15)',
+                border: '3px solid #e5e7eb',
                 overflow: 'hidden',
                 position: 'relative'
               }}>
@@ -942,13 +1002,14 @@ export default function MyPage() {
                     <div style={{
                       width: '40px',
                       height: '40px',
-                      background: 'linear-gradient(135deg, #f59e0b, #fbbf24)',
+                      background: 'white',
                       borderRadius: '50%',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontSize: '18px',
-                      boxShadow: '0 4px 12px rgba(245, 158, 11, 0.4)',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                      border: '2px solid #e5e7eb',
                       flexShrink: 0,
                       overflow: 'hidden'
                     }}>
