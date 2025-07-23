@@ -563,8 +563,8 @@ export default function ExplorePage() {
                             src="/assets/reaction/drink.png" 
                             alt="한잔해~" 
                             style={{
-                              width: '85px',
-                              height: '85px',
+                              width: '100px',
+                              height: '100px',
                               objectFit: 'cover',
                               filter: post.userReaction === 'drink!' ? 'brightness(1.1)' : 'none'
                             }}
