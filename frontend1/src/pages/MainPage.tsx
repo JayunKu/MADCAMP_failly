@@ -1,9 +1,10 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function MainPage() {
   const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
   return (
     <div style={{
       width: '100%',
@@ -523,7 +524,13 @@ export default function MainPage() {
         </Link>
         
         <Link
-          to="/chat"
+          to={isAuthenticated ? "/chat" : "/signin"}
+          onClick={(e) => {
+            if (!isAuthenticated) {
+              e.preventDefault();
+              navigate('/signin');
+            }
+          }}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -582,7 +589,13 @@ export default function MainPage() {
         </Link>
         
         <Link
-          to="/mypage"
+          to={isAuthenticated ? "/mypage" : "/signin"}
+          onClick={(e) => {
+            if (!isAuthenticated) {
+              e.preventDefault();
+              navigate('/signin');
+            }
+          }}
           style={{
             display: 'flex',
             alignItems: 'center',
