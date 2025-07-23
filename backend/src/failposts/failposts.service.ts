@@ -2,10 +2,14 @@ import { Injectable, NotFoundException, BadRequestException, InternalServerError
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateFailpostDto } from './dto/create-failpost/create-failpost';
 import { uploadToGCS } from '../gcs.service';
+import { ChatGateway } from 'src/chat/chat.gateway';
 
 @Injectable()
 export class FailpostsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private chatGateway: ChatGateway, // ChatGateway 주입
+  ) {}
 
   async createFailpost(
     createFailpostDto: CreateFailpostDto,
@@ -51,6 +55,15 @@ export class FailpostsService {
         image_id: imageUrl,
       },
     });
+
+    // 5. User의 current_tag 업데이트
+    await this.prisma.user.update({
+      where: { id: user_id },
+      data: { current_tag: tag },
+    });
+
+    // 6. ChatGateway를 통해 매칭 로직 실행
+    this.chatGateway.tryMatchUser(user_id, tag);
 
     return {
       message: 'success',
