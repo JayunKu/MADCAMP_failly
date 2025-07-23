@@ -92,16 +92,17 @@ export default function ExplorePage() {
 
   // 반응 토글
   const toggleReaction = async (postId: string, reactionType: 'drink!' | 'me too' | 'it\'s okay') => {
-    let delta = 1
+    let delta = 1;
     try {
       setPosts(prev => prev.map(post => {
         if (post.id === postId) {
           const newReactions = { ...post.reactions };
           const currentUserReaction = post.userReaction;
           
-          // 이미 같은 반응을 눌렀다면 제거
+          // 이미 같은 반응을 눌렀다면 제거 (delta = -1)
           if (currentUserReaction === reactionType) {
             newReactions[reactionType] = Math.max(0, newReactions[reactionType] - 1);
+            delta = -1;
             return { ...post, reactions: newReactions, userReaction: null };
           }
           
@@ -110,15 +111,16 @@ export default function ExplorePage() {
             newReactions[currentUserReaction] = Math.max(0, newReactions[currentUserReaction] - 1);
           }
           
-          // 새 반응 추가
+          // 새 반응 추가 (delta = 1)
           newReactions[reactionType] = newReactions[reactionType] + 1;
+          delta = 1;
           return { ...post, reactions: newReactions, userReaction: reactionType };
         }
         return post;
       }));
       
-      // 실제 API 호출 (반응 추가)
-      await addFailpostReaction(postId, reactionType, -1);
+      // 실제 API 호출 - 반응이 켜지면 1, 꺼지면 -1
+      await addFailpostReaction(postId, reactionType, delta);
     } catch (err) {
       console.error('Failed to toggle reaction:', err);
     }
