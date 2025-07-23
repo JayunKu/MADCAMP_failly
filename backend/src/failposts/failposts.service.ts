@@ -18,6 +18,7 @@ export class FailpostsService {
       where: { id: user_id },
     });
     console.log('create_fail_post의 유저 id : ', user_id);
+    console.log('create_fail_post의 tag : ', tag);
     if (!user) {
       throw new NotFoundException('user not found');
     }

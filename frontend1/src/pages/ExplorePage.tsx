@@ -35,7 +35,7 @@ export default function ExplorePage() {
   const failCategories = [
     { id: 'late', name: '지각', icon: '⏰' },
     { id: 'exam', name: '시험 망함', icon: '📝' },
-    { id: 'procrastination', name: '할 일 미룸', icon: '📅' },
+    { id: 'procrastination', name: '미룸', icon: '📅' },
     { id: 'dating', name: '소개팅 망함', icon: '💔' },
     { id: 'diet', name: '다이어트 실패', icon: '🍰' },
     { id: 'oversleep', name: '늦잠', icon: '😴' },
